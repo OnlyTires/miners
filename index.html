@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OnlyMiners: Custom NFT NerdMiner V2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════ */
+    :root {
+      --bg:         #08050f;
+      --bg2:        #0e0a1a;
+      --surface:    #130f22;
+      --border:     #1e1833;
+      --border2:    #2a2245;
+
+      /* PulseChain gradient stops */
+      --pulse-red:    #ef4444;
+      --pulse-pink:   #d946ef;
+      --pulse-violet: #7c3aed;
+      --pulse-blue:   #2563eb;
+      --pulse-cyan:   #06b6d4;
+
+      --accent:     #c026d3;   /* magenta - primary CTA */
+      --accent2:    #7c3aed;   /* violet */
+      --glow:       rgba(192,38,211,0.18);
+
+      --text:       #f1eeff;
+      --muted:      #7c6fa0;
+      --subtle:     #3d3560;
+
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'Inter', sans-serif;
+      --font-mono:    'Space Mono', monospace;
+
+      --radius:     14px;
+      --radius-sm:  8px;
+
+      /* PulseChain gradient */
+      --pulse-grad: linear-gradient(90deg,
+        #ef4444 0%, #d946ef 25%, #7c3aed 50%, #2563eb 75%, #06b6d4 100%);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    /* Background lives on <html> so the negative z-index ambient
+       layers inside <body> reliably paint above it. */
+    html { background: var(--bg); }
+
+    body {
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════
+       PULSE LINE - signature element
+       An EKG-style animated heartbeat bar
+       using the PulseChain gradient.
+    ═══════════════════════════════════ */
+    .pulse-line-wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      z-index: 1000;
+      background: rgba(8,5,15,0.9);
+    }
+    .pulse-line {
+      height: 100%;
+      background: var(--pulse-grad);
+      background-size: 200% auto;
+      width: 0%;
+      transition: width 0.1s ease;
+      animation: gradFlow 6s linear infinite;
+      box-shadow: 0 0 12px rgba(192,38,211,0.7), 0 0 4px rgba(6,182,212,0.5);
+    }
+
+    /* ═══════════════════════════════════
+       AMBIENT AURORA FIELD
+       Slow-drifting PulseChain gradient orbs
+       sitting behind all page content.
+    ═══════════════════════════════════ */
+    .aurora {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .aurora span {
+      position: absolute;
+      display: block;
+      border-radius: 50%;
+      filter: blur(80px);
+      will-change: transform;
+    }
+    .aurora .a1 {
+      width: 42vw; height: 42vw; min-width: 380px; min-height: 380px;
+      background: radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 70%);
+      top: -10%; left: -6%;
+      animation: drift1 30s ease-in-out infinite;
+    }
+    .aurora .a2 {
+      width: 36vw; height: 36vw; min-width: 320px; min-height: 320px;
+      background: radial-gradient(circle, rgba(192,38,211,0.26) 0%, transparent 70%);
+      top: 22%; right: -8%;
+      animation: drift2 36s ease-in-out infinite;
+    }
+    .aurora .a3 {
+      width: 40vw; height: 40vw; min-width: 340px; min-height: 340px;
+      background: radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%);
+      bottom: 4%; left: 18%;
+      animation: drift3 42s ease-in-out infinite;
+    }
+    .aurora .a4 {
+      width: 28vw; height: 28vw; min-width: 260px; min-height: 260px;
+      background: radial-gradient(circle, rgba(37,99,235,0.20) 0%, transparent 70%);
+      top: 58%; right: 22%;
+      animation: drift4 34s ease-in-out infinite;
+    }
+    @keyframes drift1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%     { transform: translate(8vw, 6vh) scale(1.12); }
+      66%     { transform: translate(-4vw, 10vh) scale(0.94); }
+    }
+    @keyframes drift2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%     { transform: translate(-10vw, 8vh) scale(1.18); }
+    }
+    @keyframes drift3 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      40%     { transform: translate(10vw, -8vh) scale(1.10); }
+      75%     { transform: translate(-6vw, -4vh) scale(0.92); }
+    }
+    @keyframes drift4 {
+      0%,100% { transform: translate(0,0) scale(0.96); }
+      50%     { transform: translate(6vw, -10vh) scale(1.15); }
+    }
+
+    /* ── faint circuit grid, masked so it fades out ── */
+    .grid-veil {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.055) 1px, transparent 1px);
+      background-size: 62px 62px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 25%, transparent 85%);
+      mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 25%, transparent 85%);
+      animation: gridSlide 40s linear infinite;
+    }
+    @keyframes gridSlide {
+      to { background-position: 62px 62px, 62px 62px; }
+    }
+
+    /* ── flowing gradient on all pulse-gradient text ── */
+    @keyframes gradFlow {
+      to { background-position: 200% center; }
+    }
+    .logo,
+    .hero-title .line2,
+    .hero-eyebrow span,
+    .section-title .grad,
+    .how-num,
+    .price-total .value,
+    footer .logo-footer {
+      background-size: 200% auto;
+      animation: gradFlow 9s linear infinite;
+    }
+
+    /* ═══════════════════════════════════
+       EKG DIVIDER - signature heartbeat
+       A flat baseline with a beat spike,
+       traced by a travelling gradient pulse.
+    ═══════════════════════════════════ */
+    .ekg-divider {
+      position: relative;
+      width: 100%;
+      height: 54px;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(14,10,26,0.35);
+    }
+    .ekg-divider svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .ekg-base {
+      fill: none;
+      stroke: var(--border2);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .ekg-trace {
+      fill: none;
+      stroke: url(#ekgGrad);
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 190 1400;
+      filter: drop-shadow(0 0 5px rgba(192,38,211,0.85));
+      animation: ekgRun 4.2s linear infinite;
+    }
+    @keyframes ekgRun {
+      from { stroke-dashoffset: 1590; }
+      to   { stroke-dashoffset: 0; }
+    }
+
+    /* ── live pulsing dot ── */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      margin-right: 6px;
+      vertical-align: middle;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.55); opacity: 1; }
+      70%     { box-shadow: 0 0 0 7px rgba(74,222,128,0); opacity: 0.85; }
+    }
+
+    /* ── soft ambient glow lift on cards ── */
+    .how-card, .policy-card, .spec-cell, .price-block, .order-form {
+      position: relative;
+    }
+    .how-card:hover, .policy-card:hover {
+      box-shadow: 0 8px 32px rgba(124,58,237,0.14);
+    }
+    .mockup-card:hover {
+      box-shadow: 0 10px 40px rgba(192,38,211,0.18);
+    }
+
+    /* ── slow breathing on the hero glow orbs ── */
+    .hero::before { animation: breathe 11s ease-in-out infinite; }
+    .hero::after  { animation: breathe 14s ease-in-out infinite reverse; }
+    @keyframes breathe {
+      0%,100% { opacity: 0.75; }
+      50%     { opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════
+       HEADER
+    ═══════════════════════════════════ */
+    header {
+      position: sticky;
+      top: 3px;
+      z-index: 900;
+      background: rgba(8,5,15,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.2rem;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      flex-shrink: 0;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    nav a, nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    nav a:hover, nav button:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+    }
+    .nav-cta {
+      background: var(--accent) !important;
+      color: #fff !important;
+      font-weight: 600 !important;
+      padding: 0.45rem 1.1rem !important;
+    }
+    .nav-cta:hover { background: #a21caf !important; }
+
+    /* ═══════════════════════════════════
+       HERO
+    ═══════════════════════════════════ */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ambient glow orbs */
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192,38,211,0.1) 0%, transparent 70%);
+      top: 30%; right: 15%;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .hero-eyebrow span {
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .hero-title .line1 { display: block; color: var(--text); }
+    .hero-title .line2 {
+      display: block;
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-title .line3 {
+      display: block;
+      color: var(--text);
+      opacity: 0.85;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.75;
+      position: relative;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 500; }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    /* ═══════════════════════════════════
+       DEVICE MOCKUP STRIP
+    ═══════════════════════════════════ */
+    .mockup-strip {
+      padding: 3rem 2rem 5rem;
+      position: relative;
+    }
+    .mockup-track {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .mockup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+    .mockup-card:hover {
+      border-color: rgba(247,147,26,0.4);
+      transform: translateY(-3px);
+    }
+    .mockup-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: var(--pulse-grad);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .mockup-card:hover::before { opacity: 1; }
+    .mockup-screen {
+      aspect-ratio: 4/3;
+      background: var(--bg2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .mockup-screen img,
+    .mockup-screen video {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .mockup-label {
+      padding: 0.75rem 1rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    @media (max-width: 600px) {
+      .mockup-track { grid-template-columns: 1fr; }
+    }
+
+
+    /* ═══════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════ */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.8rem 1.75rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 0 20px rgba(192,38,211,0.3);
+    }
+    .btn-primary:hover {
+      background: #a21caf;
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px rgba(192,38,211,0.45);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.8rem 1.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      background: rgba(192,38,211,0.06);
+      transform: translateY(-2px);
+    }
+
+    /* ═══════════════════════════════════
+       SECTION SCAFFOLD
+    ═══════════════════════════════════ */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    .section-sm { padding: 3.5rem 2rem; }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+    .section-title .grad {
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-body {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      line-height: 1.75;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ═══════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════ */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .how-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      position: relative;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+    .how-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-3px);
+    }
+    .how-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: 1rem;
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0.35;
+    }
+    .how-card h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+    .how-card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ═══════════════════════════════════
+       NFT COLLECTIONS SHOWCASE
+    ═══════════════════════════════════ */
+    /* ── NFT PREVIEW GRID (legacy, kept for future use) ── */
+    .collection-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(192,38,211,0.1);
+      border: 1px solid rgba(192,38,211,0.25);
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 1.25rem;
+    }
+    .collection-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.9rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .collection-chain {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .collection-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+    /* NFT preview grid placeholder */
+    .nft-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .nft-thumb {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--bg2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-align: center;
+      overflow: hidden;
+    }
+    .nft-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .nft-thumb-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      gap: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--subtle);
+      text-align: center;
+      padding: 4px;
+    }
+    .collection-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ═══════════════════════════════════
+       WHAT YOU GET (SPECS)
+    ═══════════════════════════════════ */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 3rem;
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 900px) {
+      .spec-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 500px) {
+      .spec-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .spec-cell {
+      background: var(--surface);
+      padding: 1.75rem 1.5rem;
+    }
+    .spec-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .spec-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .spec-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    .spec-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ═══════════════════════════════════
+       ORDER / COMMISSION SECTION
+    ═══════════════════════════════════ */
+    .order-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+    @media (max-width: 768px) {
+      .order-layout { grid-template-columns: 1fr; }
+    }
+    .order-info {}
+    .price-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .price-block-title {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .price-row:last-child { border-bottom: none; }
+    .price-row .item { color: var(--muted); }
+    .price-row .amount {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .price-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      border-top: 1px solid var(--border2);
+    }
+    .price-total .label {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .price-total .value {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: var(--pulse-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .price-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+
+    /* what's included list */
+    .includes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .includes-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .includes-item .check {
+      color: var(--accent);
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    /* order form */
+    .order-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+    .order-form-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 0.35rem;
+    }
+    .order-form-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.02em;
+    }
+    .form-label .req { color: var(--accent); margin-left: 2px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 0.7rem 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(192,38,211,0.12);
+    }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .case-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .case-toggle-row:hover { border-color: var(--accent); }
+    .case-toggle-row.on {
+      border-color: var(--accent);
+      background: rgba(192,38,211,0.06);
+    }
+    .case-toggle-left { display: flex; align-items: center; gap: 0.65rem; }
+    .case-toggle-row input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .case-label { font-size: 0.88rem; font-weight: 600; }
+    .case-sub { font-size: 0.72rem; color: var(--muted); display: block; }
+    .case-price-pill {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .case-price-pill .was {
+      text-decoration: line-through;
+      color: var(--muted);
+      margin-right: 4px;
+      font-size: 0.72rem;
+    }
+    .case-price-pill .now { color: #4ade80; }
+
+    /* ── CRYPTO BUTTON ── */
+    .btn-crypto {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: transparent; color: var(--accent);
+      font-weight: 700; font-size: 0.95rem; font-family: var(--font-body);
+      padding: 0.8rem; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--accent);
+      cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .btn-crypto:hover { background: var(--accent); color: #fff; }
+
+    /* summary line */
+    .order-summary {
+      background: var(--bg2);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.2rem 0;
+      color: var(--muted);
+    }
+    .summary-row.total {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.4rem;
+      padding-top: 0.5rem;
+    }
+
+    /* ═══════════════════════════════════
+       CRYPTO MODAL
+    ═══════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(8,5,15,0.85);
+      backdrop-filter: blur(6px);
+      z-index: 800;
+      display: none; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      max-width: 440px; width: 100%;
+      padding: 2rem;
+      position: relative;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--muted);
+      font-size: 1.3rem; cursor: pointer; padding: 4px;
+      border-radius: 4px;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal h3 {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 1.1rem;
+      margin-bottom: 0.25rem; padding-right: 1.5rem;
+    }
+    .modal-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 1.25rem; }
+    .coin-tabs {
+      display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .coin-tab {
+      flex: 1; min-width: 55px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.35rem; text-align: center;
+      cursor: pointer; color: var(--muted);
+      font-family: var(--font-mono); font-size: 0.7rem;
+      transition: all 0.2s;
+    }
+    .coin-tab.active {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(192,38,211,0.08);
+    }
+    .amount-box {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem;
+      margin-bottom: 1rem; text-align: center;
+    }
+    .amount-main {
+      font-family: var(--font-mono); font-size: 1.35rem; color: var(--text);
+      word-break: break-all;
+    }
+    .amount-usd { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+    .addr-block { margin-bottom: 1rem; }
+    .addr-label-sm {
+      font-size: 0.7rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      font-family: var(--font-mono); margin-bottom: 0.4rem; display: block;
+    }
+    .addr-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0.6rem 0.8rem;
+    }
+    .addr-row code {
+      flex: 1; font-family: var(--font-mono); font-size: 0.72rem;
+      color: var(--text); word-break: break-all; line-height: 1.4;
+    }
+    .copy-btn {
+      flex-shrink: 0; background: rgba(192,38,211,0.12); color: var(--accent);
+      border: none; border-radius: 5px; font-size: 0.7rem; font-weight: 700;
+      padding: 5px 9px; cursor: pointer; transition: background 0.2s;
+      white-space: nowrap; font-family: var(--font-body);
+    }
+    .copy-btn:hover { background: rgba(192,38,211,0.22); }
+    .modal-note {
+      font-size: 0.78rem; color: var(--muted); line-height: 1.55;
+      border-left: 2px solid var(--accent);
+      padding: 0.65rem 0.85rem;
+      background: rgba(192,38,211,0.04);
+      border-radius: 0 6px 6px 0;
+    }
+    .modal-note a { color: var(--accent); cursor: pointer; }
+
+    /* ═══════════════════════════════════
+       CRYPTO PAYMENT ADDRESSES FOOTER
+    ═══════════════════════════════════ */
+    .crypto-footer-band {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .crypto-footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 2rem 2rem;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 1.25rem;
+    }
+    .crypto-footer-left h4 {
+      font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+    .crypto-footer-left p { font-size: 0.82rem; color: var(--muted); }
+    .crypto-footer-addrs {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+    }
+    .addr-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.4rem 0.6rem 0.4rem 0.75rem;
+    }
+    .addr-pill .coin-tag {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      color: var(--accent); font-weight: 700;
+    }
+    .addr-pill code {
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted);
+      max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    .page-section-title {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+      margin-bottom: 1rem; margin-top: 2.5rem; padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .page-section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+    /* guide steps */
+    .guide-steps { display: flex; flex-direction: column; gap: 0.75rem; }
+    .g-step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.1rem 1.35rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .g-num {
+      font-family: var(--font-display); font-weight: 800; font-size: 0.8rem;
+      color: var(--accent); background: rgba(192,38,211,0.1);
+      border: 1px solid rgba(192,38,211,0.25);
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .g-step h3 { font-size: 0.95rem; margin-bottom: 0.3rem; font-weight: 600; }
+    .g-step p { font-size: 0.86rem; color: var(--muted); line-height: 1.65; }
+    .g-step code {
+      font-family: var(--font-mono); font-size: 0.82rem;
+      background: rgba(255,255,255,0.07); padding: 1px 6px;
+      border-radius: 4px; color: var(--text);
+    }
+
+    .warn-box {
+      background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius); padding: 1.1rem 1.35rem;
+      display: flex; gap: 0.85rem; margin: 1.5rem 0;
+    }
+    .info-box {
+      background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.25);
+      border-radius: var(--radius); padding: 1.1rem 1.35rem;
+      display: flex; gap: 0.85rem; margin: 1.5rem 0;
+    }
+    .success-box {
+      background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.2);
+      border-radius: var(--radius); padding: 1.1rem 1.35rem;
+      display: flex; gap: 0.85rem; margin: 1.5rem 0;
+    }
+    .box-icon { font-size: 1.15rem; flex-shrink: 0; margin-top: 1px; }
+    .warn-box h4, .info-box h4, .success-box h4 { font-size: 0.9rem; margin-bottom: 0.3rem; font-weight: 600; }
+    .warn-box p, .info-box p, .success-box p,
+    .warn-box ul, .info-box ul, .success-box ul { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+    .warn-box ul, .info-box ul { padding-left: 1.1rem; margin-top: 0.4rem; }
+    .warn-box li, .info-box li { margin-bottom: 0.3rem; }
+    .warn-box code, .info-box code {
+      font-family: var(--font-mono); font-size: 0.82rem;
+      background: rgba(255,255,255,0.07); padding: 1px 6px;
+      border-radius: 4px; color: var(--text);
+    }
+
+    /* troubleshoot accordions */
+    .trouble-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .trouble-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    details summary {
+      padding: 0.95rem 1.2rem; cursor: pointer; font-weight: 600;
+      font-size: 0.9rem; list-style: none;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    details summary::after {
+      content: '+'; font-size: 1.2rem; color: var(--accent); flex-shrink: 0;
+    }
+    details[open] summary::after { content: '−'; }
+    details .trouble-body {
+      padding: 0 1.2rem 1rem; color: var(--muted);
+      font-size: 0.86rem; line-height: 1.7;
+    }
+    details .trouble-body code {
+      font-family: var(--font-mono); font-size: 0.82rem;
+      background: rgba(255,255,255,0.07); padding: 1px 6px;
+      border-radius: 4px; color: var(--text);
+    }
+    details .trouble-body strong { color: var(--text); }
+    details .trouble-body ul { padding-left: 1.1rem; margin: 0.5rem 0; }
+    details .trouble-body li { margin-bottom: 0.35rem; }
+
+    /* addr cards in guide */
+    .addr-card-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .addr-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.35rem;
+    }
+    .addr-card-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.65rem; }
+    .addr-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .addr-dot.eth { background: var(--pulse-blue); }
+    .addr-card h4 { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; }
+    .addr-card .net { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .stablecoin-note {
+      font-size: 0.78rem; color: var(--muted); margin-top: 0.6rem;
+      padding-top: 0.6rem; border-top: 1px dashed var(--border);
+    }
+
+    /* coins chips */
+    .coins-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .coin-chip {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 0.35rem 0.8rem; border-radius: 99px;
+    }
+    .coin-chip.btc { border-color: var(--pulse-red); color: var(--pulse-red); }
+    .coin-chip.eth { border-color: var(--pulse-blue); color: var(--pulse-blue); }
+    .coin-chip.pulse { border-color: var(--accent); color: var(--accent); }
+
+    /* ═══════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════ */
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      color: var(--muted); font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+    }
+    footer .logo-footer {
+      font-family: var(--font-display); font-weight: 800; font-size: 1.1rem;
+      background: var(--pulse-grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; display: block; margin-bottom: 0.75rem;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ═══════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════ */
+    @media (max-width: 640px) {
+      .header-inner { padding: 0 1rem; }
+      nav a { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .how-num { font-size: 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+      .aurora, .grid-veil { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ambient PulseChain background layers -->
+<div class="aurora" aria-hidden="true">
+  <span class="a1"></span>
+  <span class="a2"></span>
+  <span class="a3"></span>
+  <span class="a4"></span>
+</div>
+<div class="grid-veil" aria-hidden="true"></div>
+
+<!-- shared gradient definition for the EKG dividers -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="ekgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ef4444"/>
+      <stop offset="25%"  stop-color="#d946ef"/>
+      <stop offset="50%"  stop-color="#7c3aed"/>
+      <stop offset="75%"  stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- scroll progress line -->
+<div class="pulse-line-wrap">
+  <div class="pulse-line" id="pulse-line"></div>
+</div>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#"><span>OnlyMiners</span><span style="display:block;font-size:0.55rem;font-weight:400;letter-spacing:0.08em;opacity:0.7;-webkit-text-fill-color:var(--muted);background:none;">Custom PulseChain NerdMiners</span></a>
+    <nav>
+      <a href="#collections">Examples</a>
+      <a href="#how">How It Works</a>
+      <a href="#policy">Policy</a>
+      <a href="#crypto-guide">Pay with Crypto</a>
+      <a href="#setup-guide">Setup Guide</a>
+      <a href="#order" class="nav-cta">Order</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <p class="hero-eyebrow">One-of-a-Kind Display Art &nbsp;·&nbsp; <span>Built on Your NFT</span></p>
+  <p style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.06em;">Custom PulseChain NerdMiners</p>
+  <h1 class="hero-title">
+    <span class="line1">Your NFT.</span>
+    <span class="line2">On a Screen.</span>
+    <span class="line3">That Actually Mines.</span>
+  </h1>
+  <p class="hero-sub">
+    Each Customized-Nerdminer is a <strong>hand-built, one-of-a-kind desktop display</strong>, custom-made to your specific NFT. It sits on your desk, shows your artwork on a live color screen, and participates in solo Bitcoin mining in the background. A genuinely unique piece tied to your collection.
+  </p>
+  <div class="hero-actions">
+    <a href="#order" class="btn-primary">Order Yours →</a>
+    <a href="#how" class="btn-ghost">See How It Works</a>
+  </div>
+  <div style="margin-top:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;position:relative;">
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(192,38,211,0.1);border:1px solid rgba(192,38,211,0.25);border-radius:99px;padding:6px 14px;font-size:0.8rem;">
+      <img src="images/otr.gif" alt="OTR" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+      <span style="color:var(--muted);">Pay with <strong style="color:var(--accent);">OTR</strong> and get <strong style="color:var(--accent);">5% off</strong> your order</span>
+    </div>
+    <a href="https://t.me/OnlyTires_Pump_Tires" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.25);border-radius:99px;padding:6px 14px;font-size:0.8rem;text-decoration:none;color:var(--muted);">
+      💬 <span>Questions? Join the <strong style="color:var(--pulse-blue);">OTR Telegram</strong></span>
+    </a>
+  </div>
+</section>
+
+<!-- product display - 2 static cards -->
+<div class="mockup-strip">
+  <div class="mockup-track">
+    <div class="mockup-card">
+      <div class="mockup-screen"><img src="images/zkpeer-device.jpg" alt="ZKPeer NerdMiner live"/></div>
+      <div class="mockup-label">ZKPeers: Live device · 348 KH/s</div>
+    </div>
+    <div class="mockup-card">
+      <div class="mockup-screen"><video autoplay muted loop playsinline><source src="images/custom-device.mp4" type="video/mp4"/></video></div>
+      <div class="mockup-label">Custom build: in action</div>
+    </div>
+  </div>
+</div>
+
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+
+<!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+<section class="section" id="how">
+  <p class="section-eyebrow">// the process</p>
+  <h2 class="section-title">From <span class="grad">your NFT</span> to a mining device</h2>
+  <p class="section-body">Every device is hand-built and individually flashed. Here's how a commission works, start to finish.</p>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">01</div>
+      <h3>Submit your NFT</h3>
+      <p>Place your order and provide your NFT's token ID and collection. We pull the artwork directly from the chain. Every build starts from your specific piece, not a generic template.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">02</div>
+      <h3>We hand-build your device</h3>
+      <p>We assemble your NerdMiner V2, fit your artwork to the 2.8" color TFT, and flash it as the permanent display. No two devices are alike. This one is built to match your NFT exactly.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">03</div>
+      <h3>Plug in &amp; connect</h3>
+      <p>Connects to your WiFi in under 2 minutes. Enter your Bitcoin address once and it runs quietly in the background. No maintenance, no noise, 1 watt of power draw.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">04</div>
+      <h3>A display that does something real</h3>
+      <p>Your device shows live mining stats on screen: hashrate, block height, uptime. It's participating in real SHA-256 solo mining against the Bitcoin network. At 1W, it won't make you rich. It's a conversation piece that's also genuinely doing something.</p>
+    </div>
+  </div>
+
+  <!-- specs strip -->
+  <div class="spec-grid">
+    <div class="spec-cell"><span class="spec-icon">⚡</span><div class="spec-label">Hashrate</div><div class="spec-value">350 KH/s</div><div class="spec-sub">SHA-256 · participates in real mining</div></div>
+    <div class="spec-cell"><span class="spec-icon">💡</span><div class="spec-label">Power draw</div><div class="spec-value">~1 Watt</div><div class="spec-sub">A nightlight uses more power</div></div>
+    <div class="spec-cell"><span class="spec-icon">📶</span><div class="spec-label">Connectivity</div><div class="spec-value">2.4GHz WiFi</div><div class="spec-sub">ESP32 · USB-C powered</div></div>
+    <div class="spec-cell"><span class="spec-icon">🖥️</span><div class="spec-label">Display</div><div class="spec-value">2.8" Color TFT</div><div class="spec-sub">Your NFT, permanently embedded</div></div>
+    <div class="spec-cell"><span class="spec-icon">⛏️</span><div class="spec-label">Pool</div><div class="spec-value">Seth's Pool</div><div class="spec-sub">pool.sethforprivacy.com</div></div>
+    <div class="spec-cell"><span class="spec-icon">🔓</span><div class="spec-label">Firmware</div><div class="spec-value">Open Source</div><div class="spec-sub">NerdMiner V2 · GitHub</div></div>
+  </div>
+</section>
+
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+
+<!-- ═══════════════ SOLO MINING EXPLAINED ═══════════════ -->
+<section class="section" id="solo-mining">
+  <p class="section-eyebrow">// what is solo mining?</p>
+  <h2 class="section-title">One device. One shot at <span class="grad">the whole block.</span></h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;margin-top:2.5rem;">
+
+    <!-- Left - explanation -->
+    <div>
+      <p style="color:var(--muted);font-size:1rem;line-height:1.8;margin-bottom:1.25rem;">
+        Bitcoin mining works by having computers compete to solve a cryptographic puzzle. Every ~10 minutes, one miner on the entire planet solves it and wins the <strong style="color:var(--text);">full block reward, currently 3.125 BTC,</strong> paid directly to their wallet.
+      </p>
+      <p style="color:var(--muted);font-size:1rem;line-height:1.8;margin-bottom:1.25rem;">
+        <strong style="color:var(--text);">Solo mining</strong> means you're entering that competition alone, not splitting rewards with a pool. If your device solves the block, you collect the entire reward yourself. If you don't solve it, you receive nothing.
+      </p>
+      <p style="color:var(--muted);font-size:1rem;line-height:1.8;margin-bottom:1.25rem;">
+        At 350 KH/s against a global network running at hundreds of <em>exahashes</em> per second, the odds are astronomically small, but the chance is <strong style="color:var(--text);">always live</strong> while the device is running. Every block is a new draw.
+      </p>
+      <p style="color:var(--muted);font-size:0.9rem;line-height:1.75;border-left:2px solid var(--accent);padding-left:1rem;">
+        Think of it as a lottery ticket that runs 24/7, costs ~$0.11/month in electricity, and displays your NFT on the screen while it works. The device isn't here to make you rich, but it's genuinely participating in the Bitcoin network.
+      </p>
+    </div>
+
+    <!-- Right - prize counter + live network stats -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- 3.125 BTC prize block -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(247,147,26,0.08) 0%,transparent 70%);pointer-events:none;"></div>
+        <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">// current block reward</div>
+        <div style="display:flex;align-items:baseline;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.35rem;">
+          <span style="font-family:var(--font-display);font-weight:800;font-size:2.5rem;color:var(--accent);letter-spacing:-0.02em;">3.125 BTC</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:1.5rem;color:var(--text);font-weight:700;" id="btc-prize-usd">≈ $...</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.4rem;">Paid to whoever solves the next block, in full, to one address.</div>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);display:flex;justify-content:space-between;">
+          <span>Updates every 2 min</span>
+          <span id="btc-price-label">BTC: $...</span>
+        </div>
+      </div>
+
+      <!-- Live network stats -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;">
+        <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">// bitcoin network <span class="live-dot"></span>live</div>
+        <div id="btc-net-stats" style="display:flex;flex-direction:column;gap:0;">
+
+          <div class="net-stat-row">
+            <span class="net-stat-label">Global Hashrate</span>
+            <span class="net-stat-val" id="net-hashrate">—</span>
+          </div>
+          <div class="net-stat-row">
+            <span class="net-stat-label">Network Difficulty</span>
+            <span class="net-stat-val" id="net-difficulty">—</span>
+          </div>
+          <div class="net-stat-row">
+            <span class="net-stat-label">Block Height</span>
+            <span class="net-stat-val" id="net-block-height">—</span>
+          </div>
+          <div class="net-stat-row">
+            <span class="net-stat-label">Avg Block Time</span>
+            <span class="net-stat-val" id="net-block-time">—</span>
+          </div>
+          <div class="net-stat-row">
+            <span class="net-stat-label">Blocks Today</span>
+            <span class="net-stat-val" id="net-blocks-day">—</span>
+          </div>
+          <div class="net-stat-row" style="border-bottom:none;">
+            <span class="net-stat-label">Your share (350 KH/s)</span>
+            <span class="net-stat-val" id="net-your-share" style="color:var(--muted);">—</span>
+          </div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--subtle);margin-top:0.85rem;">Source: blockchain.info · refreshes every 2 min</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .net-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  .net-stat-label { color: var(--muted); }
+  .net-stat-val {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text);
+    font-weight: 700;
+    text-align: right;
+  }
+  @media (max-width: 768px) {
+    #solo-mining > div[style*="grid"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+<section id="collections" style="padding:4rem 0;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 2rem 2rem;">
+    <p class="section-eyebrow">// examples</p>
+    <h2 class="section-title">Every device is <span class="grad">one of a kind</span></h2>
+    <p class="section-body">Real builds from the SAPEs and ZKPeers collections, each one matched to a single token. Drop in your NFT and yours joins the list.</p>
+  </div>
+
+  <!-- unified scrolling strip - add as many example-card divs as you like -->
+  <div class="examples-strip-wrap">
+    <div class="examples-strip" id="examples-strip">
+
+      <!-- ── EXAMPLE CARDS ── drop in real images by replacing the placeholder divs ──
+           To add more: copy any .example-card block and paste it before the closing </div>
+           The strip duplicates itself automatically for the seamless loop.            -->
+
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/zkpeer-1037.png" alt="ZKPeer #1037 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1037</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/sape-108.png" alt="SAPE #108 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#108</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/zkpeer-1001.png" alt="ZKPeer #1001 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1001</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/sape-117.png" alt="SAPE #117 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#117</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/131.png" alt="SAPE #131 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#131</span></div>
+      </div>
+
+    </div><!-- end examples-strip (JS duplicates it below for the seamless loop) -->
+  </div>
+
+  <p style="color:var(--muted);font-size:0.82rem;text-align:center;margin-top:1.5rem;padding:0 2rem;">
+    SAPEs · ZKPeers · Any NFT you bring us
+  </p>
+</section>
+
+<style>
+  /* ── EXAMPLES STRIP ── */
+  .examples-strip-wrap {
+    overflow: hidden;
+    position: relative;
+    padding: 0.5rem 0;
+  }
+  .examples-strip-wrap::before,
+  .examples-strip-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 120px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .examples-strip-wrap::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg), transparent);
+  }
+  .examples-strip-wrap::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg), transparent);
+  }
+  .examples-strip {
+    display: flex;
+    gap: 1.25rem;
+    width: max-content;
+    animation: ex-scroll 28s linear infinite;
+  }
+  .examples-strip:hover { animation-play-state: paused; }
+  @keyframes ex-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .example-card {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.2s;
+    cursor: default;
+  }
+  .example-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+  .example-img-wrap {
+    aspect-ratio: 3/4;
+    background: var(--bg2);
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* real image - add an img inside .example-img-wrap and the placeholder hides */
+  .example-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .example-placeholder {
+    font-size: 3.5rem;
+    user-select: none;
+  }
+  .example-label {
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .example-collection {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .example-token {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+</style>
+
+<script>
+  // Duplicate the strip for a seamless infinite scroll loop
+  (function() {
+    const strip = document.getElementById('examples-strip');
+    if (!strip) return;
+    const clone = strip.innerHTML;
+    strip.innerHTML = clone + clone;
+  })();
+</script>
+
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+
+<!-- ═══════════════ ORDER ═══════════════ -->
+<section class="section" id="order">
+  <p class="section-eyebrow">// commission</p>
+  <h2 class="section-title">Order your <span class="grad">one-of-a-kind</span> device</h2>
+
+  <div class="order-layout">
+
+    <!-- Left: pricing info -->
+    <div class="order-info">
+
+      <!-- What this is / isn't - clarity before purchase -->
+      <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.75rem;">// what you're actually buying</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem;">
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">A one-of-a-kind desk display</strong>, built specifically for your NFT token. No other device will ever have this exact artwork.</span></div>
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">Real solo mining participation</strong>. The device is genuinely doing SHA-256 work against the Bitcoin network while it sits on your desk.</span></div>
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;margin-top:1px;">✗</span><span style="color:var(--muted);"><strong style="color:var(--text);">Solving Blocks Isn't Guaranteed.</strong> 1W of hashrate participates in real solo mining but the odds of solving a block are astronomically small. The chance is always live, but this is not a guaranteed income device.</span></div>
+        </div>
+      </div>
+
+      <div class="price-block">
+        <div class="price-block-title">// Pricing</div>
+        <div class="price-row"><span class="item">NerdMiner V2: custom NFT skin</span><span class="amount">$28.00</span></div>
+        <div class="price-row"><span class="item">Shipping (USPS, baked in)</span><span class="amount">$10.00</span></div>
+        <div class="price-row"><span class="item">+ Acrylic case (optional)</span><span class="amount">$4.00 <span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;margin-left:4px;">$5</span></span></div>
+        <div class="price-row" style="color:var(--green);font-size:0.85rem;"><span class="item">🎉 Order 3+ and shipping is free</span><span class="amount">−$10/ea</span></div>
+        <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;"> Pay with OTR for a <strong style="color:var(--accent);">5% discount</strong></span><span class="amount" style="color:var(--accent);">−5%</span></div>
+        <div class="price-total">
+          <span class="label">Your total</span>
+          <span class="value" id="display-total">$38.00</span>
+        </div>
+        <p class="price-note">Live ETH equivalent shown at checkout. Prices in USD.</p>
+      </div>
+
+      <div style="font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:0.75rem;">What's included</div>
+      <div class="includes-list">
+        <div class="includes-item"><span class="check">✦</span><span>NerdMiner V2, 2.8" color TFT display device, hand-assembled</span></div>
+        <div class="includes-item"><span class="check">✦</span><span><strong>Your specific NFT artwork</strong>, permanently embedded. This device is built once, for your token, and won't be replicated</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>Real SHA-256 solo mining participation on ~1W draw, a live process and not a promise of income</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>Pre-configured for pool.sethforprivacy.com</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>USB-C cable &amp; printed setup instructions</span></div>
+        <div class="includes-item" id="case-include" style="display:none;"><span class="check">✦</span><span>Acrylic protective case</span></div>
+      </div>
+
+    </div>
+
+    <!-- Right: order form -->
+    <!-- SUCCESS STATE - shown after Formspree submission -->
+    <div class="order-form" id="order-success" style="display:none; text-align:center; padding:3rem 2rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
+      <div class="order-form-title" style="margin-bottom:0.5rem;">Order received!</div>
+      <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:320px; margin:0 auto 1.5rem;">We've got your commission details. Now complete your crypto payment using the button below. Your order ships once we confirm the transaction on-chain.</p>
+      <button class="btn-crypto" id="success-crypto-btn">
+        ₿ Complete Payment: <span id="success-amount">$38.00</span>
+      </button>
+      <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem;">ETH · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK</p>
+    </div>
+
+    <!-- ORDER FORM -->
+    <form class="order-form" id="order-form"
+          action="https://formspree.io/f/xykrdbgn"
+          method="POST">
+
+      <div class="order-form-title">Order Form</div>
+      <div class="order-form-sub">Fill in your NFT details and we'll build it from there.</div>
+
+      <!-- Formspree hidden fields -->
+      <input type="hidden" name="_subject"       id="fs-subject"       value="New OnlyMiners Commission x1 - $38.00" />
+      <input type="hidden" name="order_total"    id="fs-total"         value="$38.00" />
+      <input type="hidden" name="quantity"        id="fs-qty"           value="1" />
+      <input type="hidden" name="acrylic_case"    id="fs-case"          value="No" />
+      <input type="hidden" name="shipping_cost"   id="fs-shipping-cost" value="$10.00" />
+      <input type="hidden" name="international"   id="fs-international" value="No" />
+
+
+      <div class="form-group">
+        <label class="form-label" for="fs-token">Token ID / NFT Number <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input class="form-input" type="text" id="token-id" name="token_id" placeholder="e.g. 0042" />
+        <div class="form-hint">The number of your specific NFT in the collection.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fs-contract">NFT Contract Address<span class="req">*</span></label>
+        <input class="form-input" type="text" id="contract-addr" name="contract_address" placeholder="0x…" required />
+        <div class="form-hint">Helps us pull the exact artwork if there are multiple versions.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:0.5rem;">Shipping destination</label>
+        <label class="case-toggle-row" id="intl-toggle-row">
+          <span class="case-toggle-left">
+            <input type="checkbox" id="intl-checkbox" />
+            <span>
+              <span class="case-label">International order (outside USA)</span>
+              <span class="case-sub">Shipping changes from $10 to $23 · No free shipping promo</span>
+            </span>
+          </span>
+          <span class="case-price-pill">
+            <span style="color:var(--muted);">$10</span>
+            <span style="color:var(--muted);margin:0 4px;">→</span>
+            <span class="now">$23</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">How many devices?<span class="req">*</span> <span id="ship-label-inline" style="font-weight:400;color:var(--green);font-size:0.8rem;">order 3+ for free shipping</span></label>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button type="button" class="qty-stepper" id="qty-minus" onclick="changeQty(-1)">−</button>
+          <span id="qty-display" style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;min-width:2rem;text-align:center;">1</span>
+          <button type="button" class="qty-stepper" id="qty-plus" onclick="changeQty(1)">+</button>
+          <span id="qty-ship-label" style="font-size:0.8rem;color:var(--muted);margin-left:0.25rem;">+ $10 shipping</span>
+        </div>
+        <div id="free-ship-banner" style="display:none;margin-top:0.6rem;align-items:center;gap:0.5rem;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:var(--radius-sm);padding:0.55rem 0.85rem;font-size:0.82rem;color:#4ade80;font-weight:600;">
+          🎉 Free shipping unlocked on 3 or more devices!
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="fs-name">Your Name<span class="req">*</span></label>
+          <input class="form-input" type="text" id="buyer-name" name="name" placeholder="Anon" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fs-email">Email<span class="req">*</span></label>
+          <input class="form-input" type="email" id="buyer-email" name="email" placeholder="you@wallet.eth" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fs-shipping">Shipping Address<span class="req">*</span></label>
+        <textarea class="form-textarea" id="shipping-addr" name="shipping_address" placeholder="Street, City, State, ZIP, Country" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:0.5rem;">Add acrylic case? <span style="color:var(--muted);font-weight:400;">($4 · normally $5)</span></label>
+        <label class="case-toggle-row" id="case-toggle-row">
+          <span class="case-toggle-left">
+            <input type="checkbox" id="case-checkbox" name="_case_checkbox" />
+            <span>
+              <span class="case-label">Acrylic protective case</span>
+              <span class="case-sub">Custom-fit shell for your device</span>
+            </span>
+          </span>
+          <span class="case-price-pill">
+            <span class="was">$5</span>
+            <span class="now">+$4</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fs-notes">Notes <span style="color:var(--muted);font-weight:400;">(optional for single orders)</span></label>
+        <textarea class="form-textarea" id="order-notes" name="notes" placeholder="Ordering multiple different NFTs? List each token ID and contract address here, one per line.&#10;&#10;Example:&#10;Token #0042: 0xContractAddress&#10;Token #0117: 0xContractAddress&#10;&#10;Any other requests about the skin or build go here too." style="min-height:100px;"></textarea>
+        <div class="form-hint" style="margin-top:0.4rem;"><strong style="color:#fbbf24;">Required if ordering multiple different NFTs.</strong> List every token ID and contract address so we can build each device to the right NFT.</div>
+      </div>
+
+      <!-- live order summary -->
+      <div class="order-summary">
+        <div class="summary-row" id="summary-qty-row" style="display:none;"><span>Quantity</span><span id="summary-qty-val">1 × $38.00</span></div>
+        <div class="summary-row"><span>Device + NFT skin</span><span>$28.00 ea</span></div>
+        <div class="summary-row" id="summary-ship-row"><span>Shipping</span><span class="ship-amount">$10.00</span></div>
+        <div class="summary-row" id="summary-case-row" style="display:none;"><span>Acrylic case</span><span>$4.00 ea</span></div>
+        <div class="summary-row total"><span>Total</span><span id="summary-total">$38.00</span></div>
+      </div>
+
+      <!-- inline error message -->
+      <div id="form-error" style="display:none; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-size:0.82rem; color:#fca5a5; margin-bottom:0.85rem;"></div>
+
+      <!-- STEP 1: see price list -->
+      <button type="button" class="btn-crypto" id="see-prices-btn" onclick="previewPrices()">
+        See Payment Options: <span id="crypto-amount-btn">$38.00</span>
+      </button>
+      <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem; text-align:center;">
+        ETH · eHEX · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK · USDG
+        &nbsp;<a href="#crypto-guide" style="color:var(--accent);cursor:pointer;">Payment guide →</a>
+      </p>
+    </form>
+  </div>
+</section>
+
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+
+<!-- ═══════════════ POLICY SECTION ═══════════════ -->
+<section class="section" id="policy">
+  <p class="section-eyebrow">// store policy</p>
+  <h2 class="section-title">What to <span class="grad">expect</span></h2>
+  <p class="section-body" style="margin-bottom:3rem;">Every device is hand-built and tested before it leaves us. Please read these policies before ordering.</p>
+
+  <div class="policy-grid">
+
+    <div class="policy-card">
+      <div class="policy-icon">✅</div>
+      <h3>Quality &amp; Testing</h3>
+      <p>Every NerdMiner is tested twice through all functions before shipping: hashrate, WiFi, display, and firmware integrity. You receive a device that is confirmed working.</p>
+    </div>
+
+    <div class="policy-card">
+      <div class="policy-icon">🔒</div>
+      <h3>All Sales Final</h3>
+      <p>All sales are final. We do not accept returns or issue refunds except in the specific cases outlined below. The most common support issue is user-tampering with the device firmware. Any modifications to the firmware or hardware after delivery are the buyer's responsibility.</p>
+    </div>
+
+    <div class="policy-card">
+      <div class="policy-icon">📦</div>
+      <h3>Damaged in Transit</h3>
+      <p>Damage disputes are accepted <strong>within 24 hours of the delivered status appearing in tracking</strong>. If your item arrives damaged, contact us immediately with photos. Ship the item back and a refund will be issued upon receipt and inspection.</p>
+      <div class="policy-note">⚠️ Refunds are returned only to the address or wallet that sent the original payment. We do not re-route refunds to different wallets or accounts under any circumstances.</div>
+    </div>
+
+    <div class="policy-card">
+      <div class="policy-icon">📮</div>
+      <h3>Lost in Transit</h3>
+      <p>If USPS officially confirms a package is lost in transit, verified through tracking history and the post office, you will receive a full refund. We will coordinate with you to confirm through official USPS channels before processing.</p>
+    </div>
+
+    <div class="policy-card">
+      <div class="policy-icon">🚪</div>
+      <h3>After Delivery</h3>
+      <p>Once tracking shows <strong>Delivered</strong>, the package is your responsibility. We are not liable for porch theft, misdelivery, or any location-related issues after that point.</p>
+      <p style="margin-top:0.6rem;">If your package is missing after a delivered status, contact your local post office and open a missing package ticket directly with USPS. They have the tools to investigate.</p>
+      <div class="policy-note">💡 We strongly recommend shipping to a secure location such as a <strong>PO Box</strong>. Stay vigilant on tracking and check it regularly from the moment your order ships.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- css for policy section injected inline since it's a new block -->
+<style>
+  /* ── QTY STEPPER ── */
+  .qty-stepper {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .qty-stepper:hover { border-color: var(--accent); background: rgba(192,38,211,0.08); }
+  .qty-stepper:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .policy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+  .policy-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    transition: border-color 0.25s;
+  }
+  .policy-card:hover { border-color: var(--border2); }
+  .policy-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 0.1rem;
+  }
+  .policy-card h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .policy-card p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .policy-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+    line-height: 1.6;
+    margin-top: 0.35rem;
+  }
+</style>
+
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+<div class="crypto-footer-band">
+  <div class="crypto-footer-inner">
+    <div class="crypto-footer-left">
+      <h4>Pay with crypto</h4>
+      <p>ETH · eHEX · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK &nbsp;<a href="#crypto-guide" style="color:var(--accent);cursor:pointer;">Payment guide →</a></p>
+    </div>
+    <div class="crypto-footer-addrs">
+      <div class="addr-pill">
+        <span class="coin-tag">All Chains</span>
+        <code id="footer-addr">0xb645920756B145A876B677B8650EB935038b2326</code>
+        <button class="copy-btn" onclick="copyText('footer-addr',this)">Copy</button>
+      </div>
+      <div class="addr-pill">
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="logo-footer">OnlyMiners</span>
+  <p>Custom NerdMiner V2 devices for the PulseChain community.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="https://github.com/BitMaker-hub/NerdMiner_v2" target="_blank">NerdMiner GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="https://pulsechain.com" target="_blank">PulseChain</a>
+    &nbsp;·&nbsp;
+    <a href="#setup-guide">Setup Guide</a>
+    &nbsp;·&nbsp;
+    <a href="https://t.me/OnlyTires_Pump_Tires" target="_blank" rel="noopener">💬 OTR Telegram</a>
+  </p>
+  <p style="margin-top:1rem;opacity:0.45;">Each device is a one-of-a-kind display piece, not a financial product. Solo mining participation is real but carries no income expectation. Not financial advice.</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     CRYPTO MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="crypto-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCryptoModal()">✕</button>
+    <h3>Pay with Crypto</h3>
+    <p class="modal-sub" id="modal-sub">Select a coin to see the exact amount due.</p>
+    <div class="coin-tabs">
+      <div class="coin-tab active" data-coin="ETH" onclick="setCoin('ETH')">ETH</div>
+      <div class="coin-tab" data-coin="eHEX" onclick="setCoin('eHEX')">eHEX</div>
+      <div class="coin-tab" data-coin="USDT" onclick="setCoin('USDT')">USDT</div>
+      <div class="coin-tab" data-coin="USDC" onclick="setCoin('USDC')">USDC</div>
+      <div class="coin-tab" data-coin="DAI" onclick="setCoin('DAI')">DAI</div>
+      <div class="coin-tab" data-coin="USDG" onclick="setCoin('USDG')">USDG</div>
+    </div>
+    <div class="coin-tabs" style="margin-top:-0.6rem;">
+      <div class="coin-tab" data-coin="PLS" onclick="setCoin('PLS')">PLS</div>
+      <div class="coin-tab" data-coin="PLSX" onclick="setCoin('PLSX')">PLSX</div>
+      <div class="coin-tab" data-coin="pHEX" onclick="setCoin('pHEX')">pHEX</div>
+      <div class="coin-tab" data-coin="INC" onclick="setCoin('INC')">INC</div>
+      <div class="coin-tab" data-coin="OTR" onclick="setCoin('OTR')">OTR</div>
+      <div class="coin-tab" data-coin="FINK" onclick="setCoin('FINK')">FINK</div>
+    </div>
+    <div class="amount-box">
+      <div class="amount-main" id="modal-amount">...</div>
+      <div class="amount-usd" id="modal-usd">≈ $38.00 USD</div>
+    </div>
+    <div class="addr-block">
+      <span class="addr-label-sm" id="modal-addr-label">Send to this Ethereum address</span>
+      <div class="addr-row">
+        <code id="modal-addr">0xb645920756B145A876B677B8650EB935038b2326</code>
+        <button class="copy-btn" onclick="copyText('modal-addr',this)">Copy</button>
+      </div>
+      <div id="modal-network-note" style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;line-height:1.55;"></div>
+    </div><!-- /addr-block -->
+    <div id="modal-otr-discount" style="display:none;background:rgba(192,38,211,0.1);border:1px solid rgba(192,38,211,0.3);border-radius:var(--radius-sm);padding:0.55rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;color:var(--accent);font-weight:600;">🎉 5% OTR discount applied. Thank you for supporting the community!</div>
+    <div class="modal-note">
+      After sending, email your <strong>TXID</strong> to <strong>onlytires.pls@gmail.com</strong> with your NFT details and shipping address. Screenshot optional, TXID required. <strong style="color:#ef4444;">Double-check the address before sending. Funds sent to the wrong address cannot be recovered.</strong>
+    </div>
+
+    <!-- STEP 2 - submit order -->
+    <div id="modal-submit-area" style="margin-top:1rem;">
+      <button type="button" id="modal-submit-btn" class="btn-primary" style="width:100%;justify-content:center;font-size:0.9rem;" onclick="submitOrderFromModal()">
+        ✓ Submit My Order
+      </button>
+      <p style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;text-align:center;line-height:1.5;">Only click once you have your TXID ready to email to <strong>onlytires.pls@gmail.com</strong></p>
+    </div>
+    <div id="modal-submit-success" style="display:none;margin-top:1rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-sm);padding:0.75rem 1rem;font-size:0.82rem;color:#4ade80;text-align:center;">
+      ✅ Order submitted! Email your TXID to <strong>onlytires.pls@gmail.com</strong> to confirm.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CRYPTO GUIDE PAGE
+═══════════════════════════════════════════ -->
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+<section class="section" id="crypto-guide">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">// payment guide</p>
+    <h2 style="font-family:var(--font-display);font-weight:700;font-size:2rem;letter-spacing:-0.02em;margin-bottom:1rem;">Pay directly on-chain</h2>
+    <p style="color:var(--muted);font-size:1rem;line-height:1.75;max-width:640px;margin-bottom:2rem;">We are a PulseChain-native shop and prefer to be paid in PulseChain assets. We also accept ETH, stablecoins on other chains, and ETH or USDG on Robinhood Chain. All payments are crypto only. After sending, email your <strong style="color:var(--text);">Transaction ID (TXID)</strong> to <strong style="color:var(--text);">onlytires.pls@gmail.com</strong> with your NFT details and shipping address. We build and ship once the transaction is confirmed on-chain. A screenshot is optional but the TXID is required.</p>
+
+    <div class="coins-row">
+      <span class="coin-chip pulse">PLS</span>
+      <span class="coin-chip pulse">PLSX</span>
+      <span class="coin-chip pulse">pHEX</span>
+      <span class="coin-chip pulse">INC</span>
+      <span class="coin-chip pulse" style="display:inline-flex;align-items:center;gap:5px;"><img src="images/otr.gif" alt="OTR" style="width:14px;height:14px;border-radius:50%;object-fit:cover;">OTR <span style="color:var(--accent);font-size:0.8em;">-5%</span></span>
+      <span class="coin-chip pulse">FINK</span>
+      <span class="coin-chip eth">ETH</span>
+      <span class="coin-chip eth">eHEX</span>
+      <span class="coin-chip">USDT</span>
+      <span class="coin-chip">USDC</span>
+      <span class="coin-chip">DAI</span>
+      <span class="coin-chip">USDG</span>
+    </div>
+
+    <h2 class="page-section-title" style="margin-top:0;padding-top:0;border-top:none;">Steps</h2>
+    <div class="guide-steps">
+      <div class="g-step"><div class="g-num">1</div><div><h3>Fill out the order form</h3><p>Complete the order form with your NFT details, name, email, and shipping address.</p></div></div>
+      <div class="g-step"><div class="g-num">2</div><div><h3>Select your coin in the payment modal</h3><p>PulseChain assets (PLS, PLSX, pHEX, INC, OTR, FINK) and ETH all show live price conversions. Stablecoins (USDT, USDC, DAI, USDG) are 1:1 with USD. Pay with OTR and 5% is knocked off your total automatically. If OTR or FINK prices fail to load, just email us and we will confirm the amount with you before you send.</p></div></div>
+      <div class="g-step"><div class="g-num">3</div><div><h3>Send to the address shown</h3><p>Copy the wallet address, open your wallet, and send the exact amount shown. <strong style="color:#ef4444;">Double-check the address before confirming. Funds sent to the wrong address cannot be recovered.</strong> Make sure the network in your wallet matches the coin you are sending on.</p></div></div>
+      <div class="g-step"><div class="g-num">4</div><div><h3>Email your TXID to confirm</h3><p>Email your <strong>Transaction ID (TXID)</strong> to <strong>onlytires.pls@gmail.com</strong> along with your NFT details and shipping address. A screenshot is optional but the TXID is what we need. We build and ship once confirmed on-chain.</p></div></div>
+    </div>
+
+    <h2 class="page-section-title">Wallet address</h2>
+    <div class="addr-card-grid">
+      <div class="addr-card" style="grid-column:1/-1;">
+        <div class="addr-card-head"><span class="addr-dot" style="background:var(--pulse-grad);"></span><h4>One address for all chains</h4></div>
+        <div class="net">PulseChain · Ethereum · Polygon · BSC · Robinhood Chain</div>
+        <div class="addr-row" style="margin-top:0.6rem;">
+          <code id="guide-addr">0xb645920756B145A876B677B8650EB935038b2326</code>
+          <button class="copy-btn" onclick="copyText('guide-addr',this)">Copy</button>
+        </div>
+        <div class="stablecoin-note">The same <code>0x</code> address works on every supported chain. No need for different addresses per network.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="box-icon">🔀</span>
+      <div>
+        <h4>What we accept and where</h4>
+        <p>We are primarily a PulseChain shop. Here is a full breakdown of what is accepted on each chain:</p>
+        <ul style="margin-top:0.5rem;">
+          <li><strong>PulseChain (preferred)</strong> - PLS, PLSX, pHEX, INC, OTR, FINK, and stablecoins (USDT, USDC, DAI) on PRC-20</li>
+          <li><strong>Ethereum</strong> - ETH and eHEX, plus USDT, USDC, and DAI on ERC-20</li>
+          <li><strong>Polygon and BSC</strong> - USDT, USDC, and DAI on those networks</li>
+          <li><strong>Robinhood Chain</strong> - ETH and USDG are both accepted</li>
+        </ul>
+        <p style="margin-top:0.75rem;color:var(--muted);">Not sure which chain your wallet is on? Check the network name shown next to your token. When in doubt, just message us before sending.</p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <span class="box-icon">⚠️</span>
+      <div>
+        <h4>Wrong network means lost funds</h4>
+        <ul>
+          <li><strong>PLS, PLSX, pHEX, INC, OTR, FINK</strong> - PulseChain mainnet only</li>
+          <li><strong>ETH and eHEX</strong> - Ethereum mainnet. ETH is also accepted on Robinhood Chain.</li>
+          <li><strong>USDT, USDC, DAI</strong> - accepted on PulseChain, Ethereum, Polygon, and BSC. Same address on all of them.</li>
+          <li><strong>USDG</strong> - Robinhood Chain only</li>
+          <li>Do not send on Tron, Arbitrum, or Avalanche. We do not have addresses on those chains.</li>
+          <li><strong style="color:#ef4444;">Transactions are irreversible.</strong> Verify the full address and the network before you hit send. Funds sent to the wrong address cannot be recovered under any circumstances.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SETUP GUIDE SECTION
+═══════════════════════════════════════════ -->
+<div class="ekg-divider" aria-hidden="true">
+  <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
+    <path class="ekg-base"  d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" vector-effect="non-scaling-stroke"/>
+    <path class="ekg-trace" d="M0,27 L470,27 L486,27 L496,9 L508,45 L520,18 L530,27 L548,27 L700,27 L716,27 L726,14 L736,40 L746,27 L1200,27" pathLength="1200" vector-effect="non-scaling-stroke"/>
+  </svg>
+</div>
+<section class="section" id="setup-guide">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">// setup guide</p>
+    <h2 style="font-family:var(--font-display);font-weight:700;font-size:2rem;letter-spacing:-0.02em;margin-bottom:1rem;">Get mining in minutes</h2>
+    <p style="color:var(--muted);font-size:1rem;line-height:1.75;max-width:600px;margin-bottom:2rem;">Your device ships pre-flashed and ready. You just need WiFi and a Bitcoin address.</p>
+
+    <h2 class="page-section-title" style="margin-top:0;padding-top:0;border-top:none;">Initial setup</h2>
+    <div class="guide-steps">
+      <div class="g-step"><div class="g-num">1</div><div><h3>Power on via USB-C</h3><p>Connect to any USB-C charger or port. ~1W draw. Any USB port works. The display lights up automatically.</p></div></div>
+      <div class="g-step">
+        <div class="g-num">2</div>
+        <div>
+          <h3>Connect to the setup hotspot</h3>
+          <p>On first boot, the device broadcasts a WiFi access point. Connect to it from your phone or computer. No password required.</p>
+          <div style="margin-top:0.65rem;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:0.75rem 1rem;font-family:var(--font-mono);font-size:0.78rem;">
+            <div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);">Network (SSID)</span><span style="color:var(--text);">NerdMinerAP</span></div>
+            <div style="display:flex;justify-content:space-between;padding:0.2rem 0;"><span style="color:var(--muted);">Password</span><span style="color:var(--text);">(none, open network)</span></div>
+          </div>
+          <p style="margin-top:0.5rem;">A browser portal should open automatically. If it doesn't, open your browser and go to <code>192.168.4.1</code>.</p>
+        </div>
+      </div>
+      <div class="g-step"><div class="g-num">3</div><div><h3>Set up your WiFi network</h3><p>Enter your home WiFi name (SSID) and password in the portal. <strong>Both are case-sensitive.</strong> Capitals and special characters must match exactly. Tap Save and the device reboots and joins your network.</p></div></div>
+      <div class="g-step"><div class="g-num">4</div><div><h3>Add your Bitcoin address</h3><p>After connecting, enter your BTC wallet address in the portal. This is where any block reward would be sent. See the address format section below for supported formats.</p></div></div>
+      <div class="g-step"><div class="g-num">5</div><div><h3>Change the portal password (optional)</h3><p>You can set a password for the configuration portal to prevent unauthorized changes. Leave it blank to keep it open. Recommended if the device is on a shared or public network.</p></div></div>
+      <div class="g-step"><div class="g-num">6</div><div><h3>Watch it mine</h3><p>The display shows live hashrate (~350 KH/s), block height, pool connection, and shares submitted. Done. It runs 24/7 unattended.</p></div></div>
+    </div>
+
+    <h2 class="page-section-title">Physical buttons</h2>
+    <p style="color:var(--muted);font-size:0.875rem;line-height:1.7;margin-bottom:1.25rem;">The NerdMiner V2 has two physical buttons on the board. Here's what each one does:</p>
+
+    <!-- Button diagram -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;">
+          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(192,38,211,0.12);border:2px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.65rem;color:var(--accent);font-weight:700;text-align:center;line-height:1.2;">BTN<br/>1</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.2rem;">Button 1, furthest corner <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);font-weight:400;">(outer edge)</span></div>
+            <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;"><strong style="color:var(--text);">Soft reset.</strong> Press once to restart the device. Reboots the firmware and reconnects to your saved WiFi and pool. No settings are lost.</div>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--border);"></div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;">
+          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.65rem;color:#ef4444;font-weight:700;text-align:center;line-height:1.2;">BTN<br/>2</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.2rem;">Button 2, second from corner <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);font-weight:400;">(inward)</span></div>
+            <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;"><strong style="color:#ef4444;">Hard reset + full reconfiguration.</strong> Hold for <strong style="color:var(--text);">10 seconds</strong> to wipe saved WiFi credentials and relaunch the setup hotspot (<code>NerdMinerAP</code>). Use this if you need to connect to a new network, recover from a bad config, or start fresh. Your Bitcoin address may need to be re-entered after a hard reset.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="box-icon">💡</span>
+      <div><h4>When to use each button</h4>
+        <ul>
+          <li><strong>Display frozen or hashrate dropped to 0</strong> → try Button 1 (soft reset) first.</li>
+          <li><strong>Changed WiFi networks or router password</strong> → hold Button 2 for 10 seconds to reconfigure.</li>
+          <li><strong>Moving to a new location</strong> → hold Button 2, reconnect to <code>NerdMinerAP</code>, enter new WiFi details.</li>
+          <li><strong>Forgot your portal password</strong> → hold Button 2 for 10 seconds. This resets the config including the password.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span class="box-icon">ℹ️</span>
+      <div>
+        <h4>Default pool: pool.sethforprivacy.com</h4>
+        <p>Your device ships pre-configured to <code>pool.sethforprivacy.com</code>, a public solo mining pool built for low-hashrate devices like NerdMiner. <strong>Worker count and hashrate stats on the display are confirmed to work correctly with this pool.</strong> If you switch pools, these stats may not display accurately. That's a pool compatibility issue, not a hardware fault. The device is still mining either way. We recommend keeping the default pool.</p>
+      </div>
+    </div>
+
+    <h2 class="page-section-title">Bitcoin address format</h2>
+    <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;margin-bottom:1rem;">Only standard on-chain Bitcoin addresses work. Use one of these formats:</p>
+    <div class="guide-steps">
+      <div class="g-step"><div class="g-num">✓</div><div><h3>Native SegWit, starts with <code>bc1q</code></h3><p>Modern standard. Example: <code>bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</code>. Most wallets (BlueWallet, Sparrow, Exodus) generate these by default.</p></div></div>
+      <div class="g-step"><div class="g-num">✓</div><div><h3>Legacy, starts with <code>1</code></h3><p>Older format, fully supported. Example: <code>1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf</code>.</p></div></div>
+      <div class="g-step"><div class="g-num">✓</div><div><h3>P2SH SegWit, starts with <code>3</code></h3><p>Compatibility format. Example: <code>3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy</code>. Works fine.</p></div></div>
+    </div>
+    <div class="warn-box">
+      <span class="box-icon">⚠️</span>
+      <div>
+        <h4>Do NOT use these</h4>
+        <ul>
+          <li><strong>Lightning Network addresses</strong>, off-chain. Pools can't pay to them.</li>
+          <li><strong>Taproot addresses (<code>bc1p</code>)</strong>, not universally supported by all public pools.</li>
+          <li><strong>Exchange deposit addresses</strong>. Many exchanges don't credit mining payouts.</li>
+          <li><strong>Any Ethereum or non-Bitcoin address</strong>. These will cause errors.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="page-section-title">Troubleshooting</h2>
+    <div class="trouble-list">
+      <details class="trouble-item"><summary>Device won't connect to WiFi</summary><div class="trouble-body"><p><strong>WiFi credentials are case-sensitive.</strong> This is the most common issue. Check:</p><ul><li>SSID (network name) must match <em>exactly</em>. <code>MyNetwork</code> and <code>mynetwork</code> are treated as different networks.</li><li>Password must match exactly, including capitals, numbers, and symbols.</li><li>The device only supports <strong>2.4 GHz WiFi</strong>. If your router broadcasts 2.4 GHz and 5 GHz under one name, split them or connect to the 2.4 GHz band specifically.</li><li>Guest networks with captive portals (hotel/café) block mining pool connections. Use a standard home network.</li></ul><p style="margin-top:0.6rem;">To re-enter credentials: hold the device button for several seconds to reset and relaunch the setup hotspot.</p></div></details>
+
+      <details class="trouble-item"><summary>Display shows 0 KH/s or no hashrate</summary><div class="trouble-body"><ul><li>Check that WiFi connected (WiFi icon on display).</li><li>Pool address should be <code>pool.sethforprivacy.com</code>.</li><li>Some routers/firewalls block mining pool ports. Try on a different network to test.</li><li>Hashrate can take 30 to 60 seconds to appear after first connecting.</li></ul></div></details>
+
+      <details class="trouble-item"><summary>Worker count or stats not displaying correctly</summary><div class="trouble-body"><p>Worker count and pool-side stats are confirmed accurate on the default pool <code>pool.sethforprivacy.com</code>. If you've switched to a different pool, these may show 0 or not update. This is a pool compatibility limitation, not a hardware issue. The device is still mining. Switching back to the default pool restores full stats.</p></div></details>
+
+      <details class="trouble-item"><summary>Bitcoin address is being rejected</summary><div class="trouble-body"><p>Make sure your address starts with <code>bc1q</code>, <code>1</code>, or <code>3</code>. Common mistakes:</p><ul><li>Using a Lightning invoice (starts with <code>lnbc</code>). This is not an on-chain address.</li><li>Using a Taproot address (<code>bc1p</code>). Not supported by all pools.</li><li>Pasting an Ethereum address (<code>0x…</code>) by mistake.</li><li>Extra spaces before/after the address when pasting.</li></ul></div></details>
+
+      <details class="trouble-item"><summary>Display is frozen or showing garbled graphics</summary><div class="trouble-body"><p>Unplug and replug the USB-C cable to power-cycle. This reboots the firmware cleanly. If garbled graphics persist, the firmware may need reflashing. Instructions and the latest binary are on the <a href="https://github.com/BitMaker-hub/NerdMiner_v2" target="_blank" style="color:var(--accent);">NerdMiner V2 GitHub</a>.</p></div></details>
+
+      <details class="trouble-item"><summary>How do I change the mining pool?</summary><div class="trouble-body"><p>Connect to the same WiFi network as your device. Find the device's IP address (shown on the display or in your router's device list). Open that IP in a browser. The web interface lets you change the pool URL, port, and BTC address. Worker stats only display correctly on <code>pool.sethforprivacy.com</code>.</p></div></details>
+
+      <details class="trouble-item"><summary>What are my actual odds of winning a block?</summary><div class="trouble-body"><p>Very low. To be direct with you: a 1W device running at 350 KH/s against a Bitcoin network operating at hundreds of exahashes per second is not going to print money. The odds of solving a block are astronomically small. We're talking statistical timeframes measured in millions of years for a single device. That is the honest answer and we won't sugarcoat it.</p><p style="margin-top:0.6rem;">What the device <em>is</em> doing is real. It's submitting valid SHA-256 work to a solo mining pool and every new Bitcoin block gives it a mathematically legitimate (if tiny) chance. That chance is always live while the device runs. This is not a get-rich device. It's a <strong>desktop display that happens to participate in something real</strong>. The value is in the object, a one-of-a-kind piece built from your NFT that sits on your desk and does something most people have never seen.</p></div></details>
+    </div>
+
+    <div class="success-box" style="margin-top:2rem;">
+      <span class="box-icon">🍀</span>
+      <div><h4>Still stuck?</h4><p>The NerdMiner community is active on <a href="https://github.com/BitMaker-hub/NerdMiner_v2/issues" target="_blank" style="color:var(--accent);">GitHub Issues</a>. Search existing issues or open a new one with your device details and display output.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SCRIPT
+═══════════════════════════════════════════ -->
+<script>
+  /* -- CONFIG - update these -- */
+  const CRYPTO_ADDRESSES = {
+    // One address for all chains - 0x works on ETH, PulseChain, Polygon, BSC, Robinhood Chain
+    ETH:  '0xb645920756B145A876B677B8650EB935038b2326',
+    eHEX: '0xb645920756B145A876B677B8650EB935038b2326',
+    USDT: '0xb645920756B145A876B677B8650EB935038b2326',
+    USDC: '0xb645920756B145A876B677B8650EB935038b2326',
+    USDG: '0xb645920756B145A876B677B8650EB935038b2326',
+    DAI:  '0xb645920756B145A876B677B8650EB935038b2326',
+    PLS:  '0xb645920756B145A876B677B8650EB935038b2326',
+    PLSX: '0xb645920756B145A876B677B8650EB935038b2326',
+    pHEX: '0xb645920756B145A876B677B8650EB935038b2326',
+    INC:  '0xb645920756B145A876B677B8650EB935038b2326',
+    OTR:  '0xb645920756B145A876B677B8650EB935038b2326',
+    FINK: '0xb645920756B145A876B677B8650EB935038b2326',
+  };
+  const BASE_PRICE      = 28.00;
+  const SHIP_DOMESTIC   = 10.00;
+  const SHIP_INTL       = 23.00;
+  const CASE_PRICE      =  4.00;
+  const FREE_SHIP_QTY   =  3;   // domestic only
+
+  /* ── STATE ──────────────────────────────── */
+  let withCase        = false;
+  let qty             = 1;
+  let isInternational = false;
+  let activeCoin      = 'ETH';
+  let cryptoPrices    = { bitcoin: null, ethereum: null, pulsechain: null, ehex: null, phex: null, pulsex: null, inc: null, otr: null, fink: null, status: 'loading' };
+
+  /* ── TOTAL CALCULATOR ─────────────────────── */
+  function calcTotal() {
+    const freeShip  = !isInternational && qty >= FREE_SHIP_QTY;
+    const shipPrice = isInternational ? SHIP_INTL : (freeShip ? 0 : SHIP_DOMESTIC);
+    const devicesTotal = (BASE_PRICE + (withCase ? CASE_PRICE : 0)) * qty;
+    return devicesTotal + shipPrice;
+  }
+
+  /* ── PRICING UPDATER ──────────────────────── */
+  function updatePricing() {
+    const total    = calcTotal();
+    const fmtTotal = '$' + total.toFixed(2);
+    const freeShip = !isInternational && qty >= FREE_SHIP_QTY;
+    const shipPrice = isInternational ? SHIP_INTL : (freeShip ? 0 : SHIP_DOMESTIC);
+    const unitPrice = BASE_PRICE + (withCase ? CASE_PRICE : 0);
+    const el = id => document.getElementById(id);
+
+    if (el('display-total'))     el('display-total').textContent     = fmtTotal;
+    if (el('summary-total'))     el('summary-total').textContent     = fmtTotal;
+    if (el('crypto-amount-btn')) el('crypto-amount-btn').textContent = fmtTotal;
+
+    const shipRow = el('summary-ship-row');
+    if (shipRow) {
+      shipRow.style.display = 'flex';
+      const shipLabel = isInternational
+        ? '$' + SHIP_INTL.toFixed(2) + ' (intl flat)'
+        : (freeShip ? 'FREE 🎉' : '$' + SHIP_DOMESTIC.toFixed(2));
+      shipRow.querySelector('.ship-amount').textContent = shipLabel;
+      shipRow.querySelector('.ship-amount').style.color = freeShip && !isInternational ? 'var(--green)' : '';
+    }
+    const caseRow = el('summary-case-row');
+    if (caseRow) caseRow.style.display = withCase ? 'flex' : 'none';
+    const qtyRow = el('summary-qty-row');
+    if (qtyRow) qtyRow.style.display = qty > 1 ? 'flex' : 'none';
+    if (el('summary-qty-val')) el('summary-qty-val').textContent = qty + ' × $' + unitPrice.toFixed(2);
+    const promoBanner = el('free-ship-banner');
+    if (promoBanner) promoBanner.style.display = (freeShip && !isInternational) ? 'flex' : 'none';
+    const caseInclude = el('case-include');
+    if (caseInclude) caseInclude.style.display = withCase ? 'flex' : 'none';
+
+    if (el('fs-total'))         el('fs-total').value         = fmtTotal;
+    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$4.00 each)' : 'No';
+    if (el('fs-qty'))           el('fs-qty').value           = qty;
+    if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)' : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
+    if (el('fs-international')) el('fs-international').value = isInternational ? 'Yes' : 'No';
+    if (el('fs-subject'))       el('fs-subject').value       = 'New OnlyMiners Commission x' + qty + ' - ' + fmtTotal;
+
+    if (document.getElementById('crypto-modal').classList.contains('open')) renderModal(total);
+  }
+
+  /* ── SCROLL PROGRESS LINE ─────────────────── */
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('pulse-line');
+    if (!el) return;
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    el.style.width = pct + '%';
+  });
+
+  /* ── CASE TOGGLE ──────────────────────────── */
+  const caseCheckbox  = document.getElementById('case-checkbox');
+  const caseToggleRow = document.getElementById('case-toggle-row');
+
+  function changeQty(delta) {
+    qty = Math.max(1, qty + delta);
+    const freeShip = qty >= FREE_SHIP_QTY;
+    const display  = document.getElementById('qty-display');
+    const minus    = document.getElementById('qty-minus');
+    const shipLbl  = document.getElementById('qty-ship-label');
+    if (display) display.textContent = qty;
+    if (minus)   minus.disabled = qty <= 1;
+    if (shipLbl) {
+      const qs = !isInternational && qty >= FREE_SHIP_QTY;
+      shipLbl.textContent = isInternational ? '+ $23 international shipping each' : (qs ? '🎉 free shipping!' : '+ $10 shipping each');
+      shipLbl.style.color = qs ? 'var(--green)' : 'var(--muted)';
+    }
+    updatePricing();
+  }
+
+  caseCheckbox.addEventListener('change', () => {
+    withCase = caseCheckbox.checked;
+    caseToggleRow.classList.toggle('on', withCase);
+    updatePricing();
+  });
+
+  const intlCheckbox  = document.getElementById('intl-checkbox');
+  const intlToggleRow = document.getElementById('intl-toggle-row');
+  if (intlCheckbox) {
+    intlCheckbox.addEventListener('change', () => {
+      isInternational = intlCheckbox.checked;
+      intlToggleRow.classList.toggle('on', isInternational);
+      // Hide free shipping label on international
+      const shipLabelInline = document.getElementById('ship-label-inline');
+      if (shipLabelInline) {
+        shipLabelInline.textContent = isInternational ? '$23 flat rate, no free shipping' : 'order 3+ for free shipping';
+        shipLabelInline.style.color = isInternational ? 'var(--muted)' : 'var(--green)';
+      }
+      updatePricing();
+    });
+  }
+
+  /* ── CRYPTO + NETWORK PRICE FETCH ──────────────────── */
+
+  // Verified CoinGecko IDs (as of 2025):
+  //   bitcoin, ethereum, pulsechain (PLS), pulsechain-hex (pHEX),
+  //   hex (eHEX), pulsex (PLSX), pulsex-incentive-token (INC)
+  const CG_IDS = 'bitcoin,ethereum,pulsechain,hex,pulsechain-hex,pulsex,pulsex-incentive-token';
+
+  // DexScreener REST API - returns JSON with pairs array, priceUsd field
+  async function fetchDexScreenerPrice(pairAddress) {
+    try {
+      const r = await fetch('https://api.dexscreener.com/latest/dex/pairs/pulsechain/' + pairAddress);
+      if (!r.ok) return null;
+      const d = await r.json();
+      // pairs is an array; pick the highest-liquidity entry with a valid priceUsd
+      const pairs = d.pairs || (d.pair ? [d.pair] : []);
+      const best = pairs
+        .filter(p => p.priceUsd && parseFloat(p.priceUsd) > 0)
+        .sort((a, b) => (parseFloat(b.liquidity?.usd) || 0) - (parseFloat(a.liquidity?.usd) || 0))[0];
+      return best ? parseFloat(best.priceUsd) : null;
+    } catch(e) { return null; }
+  }
+
+  async function fetchPrices() {
+    // ── CoinGecko batch fetch ──
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + CG_IDS + '&vs_currencies=usd');
+      if (!r.ok) throw new Error('CoinGecko error ' + r.status);
+      const d = await r.json();
+      cryptoPrices.bitcoin    = d['bitcoin']?.usd                   ?? null; // BTC
+      cryptoPrices.ethereum   = d['ethereum']?.usd                  ?? null; // ETH
+      cryptoPrices.pulsechain = d['pulsechain']?.usd                ?? null; // PLS
+      cryptoPrices.ehex       = d['hex']?.usd                       ?? null; // eHEX (Ethereum)
+      cryptoPrices.phex       = d['pulsechain-hex']?.usd            ?? null; // pHEX (PulseChain)
+      cryptoPrices.pulsex     = d['pulsex']?.usd                    ?? null; // PLSX
+      cryptoPrices.inc        = d['pulsex-incentive-token']?.usd    ?? null; // INC
+      cryptoPrices.status = 'ok';
+      updateBtcPrizeCounter();
+    } catch(e) {
+      cryptoPrices.status = 'failed';
+    }
+
+    // ── DexScreener API for OTR, FINK, and pHEX ──
+    // pHEX - CoinGecko free tier is unreliable for this token; use DexScreener HEX/WPLS pair
+    // Pair: 0xf1f4ee610b2babb05c635f726ef8b0c568c8dc65 - $513K liquidity, highest volume on PulseX v1
+    const phexDex = await fetchDexScreenerPrice('0xf1f4ee610b2babb05c635f726ef8b0c568c8dc65');
+    if (phexDex) cryptoPrices.phex = phexDex; // DexScreener wins if available
+    // OTR pair on PulseChain
+    cryptoPrices.otr  = await fetchDexScreenerPrice('0xed580fe7924da397a8f10d4fcd3fbae9acc6899a');
+    // FINK pair on PulseChain
+    cryptoPrices.fink = await fetchDexScreenerPrice('0x00c7155894c7ca9a64e02dafb668adce5625cfde');
+
+    if (document.getElementById('crypto-modal').classList.contains('open')) renderModal(calcTotal());
+  }
+
+  function updateBtcPrizeCounter() {
+    const btc = cryptoPrices.bitcoin;
+    const prizeEl = document.getElementById('btc-prize-usd');
+    const labelEl = document.getElementById('btc-price-label');
+    if (btc) {
+      const prize = (3.125 * btc).toLocaleString('en-US', { style:'currency', currency:'USD', maximumFractionDigits: 0 });
+      if (prizeEl) prizeEl.textContent = '\u2248 ' + prize;
+      if (labelEl) labelEl.textContent = 'BTC: $' + btc.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+  }
+
+  async function fetchNetworkStats() {
+    try {
+      const r = await fetch('https://api.blockchain.info/stats');
+      if (!r.ok) return;
+      const d = await r.json();
+      const hashRateEH = d.hash_rate / 1e9;
+      const hashStr = hashRateEH >= 1000
+        ? (hashRateEH / 1000).toFixed(2) + ' ZH/s'
+        : hashRateEH.toFixed(1) + ' EH/s';
+      const diffT = d.difficulty / 1e12;
+      const networkHS = d.hash_rate * 1e9;
+      const deviceHS = 350 * 1e3;
+      const shareOdds = networkHS > 0 ? (networkHS / deviceHS) : 0;
+      const shareStr = shareOdds > 0
+        ? '1 in ' + shareOdds.toExponential(1).replace('e+', '×10^')
+        : '—';
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('net-hashrate',    hashStr);
+      set('net-difficulty',  diffT.toFixed(2) + ' T');
+      set('net-block-height', d.n_blocks_total ? d.n_blocks_total.toLocaleString() : '—');
+      set('net-block-time',  d.minutes_between_blocks ? d.minutes_between_blocks.toFixed(1) + ' min avg' : '—');
+      set('net-blocks-day',  d.n_blocks_mined ? d.n_blocks_mined + ' (last 24h)' : '—');
+      set('net-your-share',  shareStr);
+    } catch(e) {}
+  }
+
+  fetchPrices();
+  fetchNetworkStats();
+  setInterval(fetchPrices, 120000);      // CoinGecko refreshes every 2min
+  setInterval(fetchNetworkStats, 120000);
+
+
+  /* ── FORM FLOW ───────────────────────────────
+     Step 1: "See Payment Options" → opens crypto modal with price list
+     Step 2: Inside modal → "Submit My Order" → posts form to Formspree
+  ─────────────────────────────────────────── */
+  function previewPrices() {
+    // Validate required fields before showing prices
+    const required = [
+      { id: 'contract-addr', label: 'NFT Contract Address' },
+      { id: 'buyer-name',    label: 'Your Name' },
+      { id: 'buyer-email',   label: 'Email' },
+      { id: 'shipping-addr', label: 'Shipping Address' },
+    ];
+    let missing = [];
+    required.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el || !el.value.trim()) missing.push(f.label);
+    });
+    if (missing.length) {
+      const errEl = document.getElementById('form-error');
+      if (errEl) {
+        errEl.textContent = 'Please fill in: ' + missing.join(', ');
+        errEl.style.display = 'block';
+      }
+      return;
+    }
+    const errEl = document.getElementById('form-error');
+    if (errEl) errEl.style.display = 'none';
+    openCryptoModal();
+  }
+
+  async function submitOrderFromModal() {
+    const btn = document.getElementById('modal-submit-btn');
+    const successEl = document.getElementById('modal-submit-success');
+    const submitArea = document.getElementById('modal-submit-area');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+    const form = document.getElementById('order-form');
+    if (!form) return;
+
+    // Sync hidden fields before submit
+    const total = calcTotal();
+    const freeShip = !isInternational && qty >= FREE_SHIP_QTY;
+    const el = id => document.getElementById(id);
+    if (el('fs-total'))         el('fs-total').value         = '$' + total.toFixed(2);
+    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$4.00 each)' : 'No';
+    if (el('fs-qty'))           el('fs-qty').value           = qty;
+    if (el('fs-international')) el('fs-international').value = isInternational ? 'Yes' : 'No';
+    if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational
+      ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)'
+      : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
+    if (el('fs-subject')) el('fs-subject').value = 'New OnlyMiners Commission x' + qty + ' - $' + total.toFixed(2);
+
+    try {
+      const data = new FormData(form);
+      const res = await fetch(form.action, {
+        method: 'POST', body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        if (submitArea) submitArea.style.display = 'none';
+        if (successEl) successEl.style.display = 'block';
+        // Also show the main success state
+        const formEl = document.getElementById('order-form');
+        const orderSuccess = document.getElementById('order-success');
+        if (formEl) formEl.style.display = 'none';
+        if (orderSuccess) {
+          const sa = document.getElementById('success-amount');
+          if (sa) sa.textContent = '$' + total.toFixed(2);
+          orderSuccess.style.display = 'block';
+        }
+      } else {
+        const json = await res.json().catch(() => ({}));
+        const msg = (json.errors || []).map(e => e.message).join(', ') || 'Submission failed. Please try again.';
+        if (btn) { btn.disabled = false; btn.textContent = '✓ Submit My Order'; }
+        alert(msg);
+      }
+    } catch(e) {
+      if (btn) { btn.disabled = false; btn.textContent = '✓ Submit My Order'; }
+      alert('Network error. Please check your connection and try again.');
+    }
+  }
+  /* ── CRYPTO MODAL ────────────────────────── */
+  function openCryptoModal() {
+    activeCoin = 'ETH';
+    document.querySelectorAll('.coin-tab').forEach(t => t.classList.toggle('active', t.dataset.coin === 'ETH'));
+    const total = calcTotal();
+    const qtyLabel = qty > 1 ? ` (×${qty})` : '';
+    document.getElementById('modal-sub').textContent = '$' + total.toFixed(2) + ' USD' + qtyLabel + ', select a coin';
+    // Reset submit button state
+    const msBtn = document.getElementById('modal-submit-btn');
+    const msSuccess = document.getElementById('modal-submit-success');
+    const msArea = document.getElementById('modal-submit-area');
+    if (msBtn) { msBtn.disabled = false; msBtn.textContent = '✓ Submit My Order'; }
+    if (msSuccess) msSuccess.style.display = 'none';
+    if (msArea) msArea.style.display = 'block';
+    renderModal(total);
+    document.getElementById('crypto-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCryptoModal() {
+    document.getElementById('crypto-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function setCoin(coin) {
+    activeCoin = coin;
+    document.querySelectorAll('.coin-tab').forEach(t => t.classList.toggle('active', t.dataset.coin === coin));
+    renderModal(calcTotal());
+  }
+
+  const OTR_DISCOUNT = 0.05;
+
+  function renderModal(usd) {
+    const amountEl   = document.getElementById('modal-amount');
+    const addrLabel  = document.getElementById('modal-addr-label');
+    const addrEl     = document.getElementById('modal-addr');
+    const usdEl      = document.getElementById('modal-usd');
+    const noteEl     = document.getElementById('modal-network-note');
+    const discountEl = document.getElementById('modal-otr-discount');
+    const subEl      = document.getElementById('modal-sub');
+    if (!amountEl) return;
+
+    const coin   = activeCoin;
+    const isOTR  = coin === 'OTR';
+    const effectiveUsd = isOTR ? usd * (1 - OTR_DISCOUNT) : usd;
+    const priceStatus  = cryptoPrices.status;
+
+    // Helper - format a token amount from a USD price
+    // decimals: how many decimal places; 0 = round to integer (for micro-priced tokens)
+    function tokenAmt(price, symbol, decimals) {
+      if (!price || price <= 0) {
+        return priceStatus === 'failed' ? 'Price unavailable' : 'Loading…';
+      }
+      const amt = effectiveUsd / price;
+      const formatted = decimals === 0
+        ? Math.round(amt).toLocaleString()
+        : amt.toFixed(decimals);
+      return formatted + ' ' + symbol;
+    }
+
+    // Stablecoins - 1:1 USD, no price fetch needed
+    const stables = new Set(['USDT', 'USDC', 'DAI', 'USDG']);
+
+    // Coin routing table - maps each coin to its display config
+    const coinConfig = {
+      ETH:  { amt: () => tokenAmt(cryptoPrices.ethereum,   'ETH',  5), label: 'Send ETH to this address'  },
+      eHEX: { amt: () => tokenAmt(cryptoPrices.ehex,       'eHEX', 0), label: 'Send eHEX to this address' },
+      PLS:  { amt: () => tokenAmt(cryptoPrices.pulsechain, 'PLS',  0), label: 'Send PLS to this address'  },
+      PLSX: { amt: () => tokenAmt(cryptoPrices.pulsex,     'PLSX', 0), label: 'Send PLSX to this address' },
+      pHEX: { amt: () => tokenAmt(cryptoPrices.phex,       'pHEX', 0), label: 'Send pHEX to this address' },
+      INC:  { amt: () => tokenAmt(cryptoPrices.inc,        'INC',  0), label: 'Send INC to this address'  },
+      OTR:  { amt: () => cryptoPrices.otr
+                           ? tokenAmt(cryptoPrices.otr,    'OTR',  0)
+                           : (priceStatus === 'failed' ? 'Price unavailable, email us' : 'Loading…'),
+              label: 'Send OTR to this address' },
+      FINK: { amt: () => cryptoPrices.fink
+                           ? tokenAmt(cryptoPrices.fink,   'FINK', 0)
+                           : (priceStatus === 'failed' ? 'Price unavailable, email us' : 'Loading…'),
+              label: 'Send FINK to this address' },
+    };
+
+    // OTR discount banner + subtitle
+    if (discountEl) discountEl.style.display = isOTR ? 'block' : 'none';
+    if (subEl) {
+      if (isOTR) {
+        subEl.innerHTML =
+          '<span style="text-decoration:line-through;opacity:0.5;">$' + usd.toFixed(2) + '</span>' +
+          ' → <strong style="color:var(--accent);">$' + effectiveUsd.toFixed(2) + ' (5% OTR discount)</strong>';
+      } else {
+        subEl.textContent = '$' + usd.toFixed(2) + ' USD, select a coin below';
+      }
+    }
+
+    // Stablecoins: amount is just the dollar value directly
+    if (stables.has(coin)) {
+      amountEl.textContent  = effectiveUsd.toFixed(2) + ' ' + coin;
+      addrLabel.textContent = 'Send ' + coin + ' to this address';
+    } else {
+      const cfg = coinConfig[coin];
+      if (cfg) {
+        // OTR: show full token amount crossed out, then discounted amount
+        if (isOTR && cryptoPrices.otr && cryptoPrices.otr > 0) {
+          const fullTokens = Math.round(usd / cryptoPrices.otr).toLocaleString();
+          const discTokens = Math.round(effectiveUsd / cryptoPrices.otr).toLocaleString();
+          amountEl.innerHTML =
+            '<span style="text-decoration:line-through;opacity:0.45;font-size:0.85em;">' + fullTokens + ' OTR</span>' +
+            ' <span style="color:var(--accent);">→ ' + discTokens + ' OTR</span>';
+        } else {
+          amountEl.textContent = cfg.amt();
+        }
+        addrLabel.textContent = cfg.label;
+      }
+    }
+    if (noteEl) noteEl.textContent = '';
+
+    if (usdEl) usdEl.textContent = isOTR
+      ? '≈ $' + effectiveUsd.toFixed(2) + ' USD  (5% off $' + usd.toFixed(2) + ')'
+      : '≈ $' + usd.toFixed(2) + ' USD';
+
+    if (addrEl) addrEl.textContent = CRYPTO_ADDRESSES[coin] || CRYPTO_ADDRESSES.ETH;
+  }
+
+  /* populate guide address on load */
+  const gAddr = document.getElementById('guide-addr');
+  if (gAddr) gAddr.textContent = CRYPTO_ADDRESSES.ETH;
+
+  /* ── FOOTER ADDRESSES ────────────────────── */
+  const fAddr = document.getElementById('footer-addr');
+  if (fAddr) fAddr.textContent = CRYPTO_ADDRESSES.ETH;
+
+  /* ── COPY ────────────────────────────────── */
+  function copyText(elId, btn) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = orig; }, 1500);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = el.textContent;
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  }
+
+  /* ── CLOSE MODALS ON OVERLAY CLICK ──────── */
+  document.getElementById('crypto-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('crypto-modal')) closeCryptoModal();
+  });
+
+  /* initial render */
+  updatePricing();
+</script>
+<!-- Formspree Ajax library -->
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+
+<script>
+  /* ── FORMSPREE FORM HANDLER ──────────────────────────────
+     Intercepts the native form submit, posts to Formspree
+     via Ajax, then shows the success state + crypto modal.
+  ────────────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('order-form');
+    const successEl = document.getElementById('order-success');
+    const errorEl = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+    const successCryptoBtn = document.getElementById('success-crypto-btn');
+    const successAmountEl = document.getElementById('success-amount');
+
+    if (!form) return;
+
+    // Keep success-state crypto button in sync with pricing
+    function syncSuccessAmount() {
+      if (successAmountEl) successAmountEl.textContent = '$' + calcTotal().toFixed(2);
+    }
+
+    // Success-state crypto button opens modal
+    if (successCryptoBtn) {
+      successCryptoBtn.addEventListener('click', openCryptoModal);
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Update hidden fields with current pricing before submit
+      const total = calcTotal();
+      const freeShip = qty >= FREE_SHIP_QTY;
+      const fsTotal   = document.getElementById('fs-total');
+      const fsCase    = document.getElementById('fs-case');
+      const fsSubject = document.getElementById('fs-subject');
+      const fsQty     = document.getElementById('fs-qty');
+      const fsShipCost = document.getElementById('fs-shipping-cost');
+      if (fsTotal)    fsTotal.value    = '$' + total.toFixed(2);
+      if (fsCase)     fsCase.value     = withCase ? 'Yes (+$4.00 each)' : 'No';
+      if (fsSubject)  fsSubject.value  = 'New Customized-Nerdminer Commission x' + qty + ' - $' + total.toFixed(2);
+      if (fsQty)      fsQty.value      = qty;
+      if (fsShipCost) fsShipCost.value = isInternational ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)' : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
+
+      // Disable button and show loading state
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+      if (errorEl) errorEl.style.display = 'none';
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          // Show success state, hide form
+          form.style.display = 'none';
+          if (successEl) {
+            syncSuccessAmount();
+            successEl.style.display = 'block';
+          }
+          // Auto-open crypto modal so they can pay immediately
+          openCryptoModal();
+        } else {
+          const json = await res.json().catch(() => ({}));
+          const msg = (json.errors || []).map(e => e.message).join(', ')
+            || 'Something went wrong. Please try again or email us directly.';
+          if (errorEl) {
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+          }
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '₿ Submit Order and Pay with Crypto: <span id="crypto-amount-btn">$' + calcTotal().toFixed(2) + '</span>';
+        }
+      } catch(err) {
+        if (errorEl) {
+          errorEl.textContent = 'Network error. Check your connection and try again.';
+          errorEl.style.display = 'block';
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '₿ Submit Order and Pay with Crypto: <span id="crypto-amount-btn">$' + calcTotal().toFixed(2) + '</span>';
+      }
+    });
+  });
+</script>
+</body>
+</html>
