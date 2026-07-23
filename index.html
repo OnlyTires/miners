@@ -50,7 +50,7 @@
 
     /* Background lives on <html> so the negative z-index ambient
        layers inside <body> reliably paint above it. */
-    html { background: var(--bg); }
+    html { background: var(--bg); overflow-x: hidden; }
 
     body {
       background: transparent;
@@ -58,6 +58,7 @@
       font-family: var(--font-body);
       line-height: 1.6;
       overflow-x: hidden;
+      width: 100%;
     }
 
     /* ═══════════════════════════════════
@@ -1237,6 +1238,43 @@
       nav a { display: none; }
       .form-row { grid-template-columns: 1fr; }
       .how-num { font-size: 2rem; }
+
+      /* centre and contain everything on mobile */
+      .section {
+        padding: 3.5rem 1.25rem;
+        width: 100%;
+      }
+      .section-title { font-size: 1.75rem; }
+      .section-body  { font-size: 0.9rem; }
+
+      /* grids collapse to single column */
+      .how-grid,
+      .order-layout,
+      .policy-grid,
+      .spec-strip,
+      .addr-card-grid { grid-template-columns: 1fr !important; }
+
+      /* full-width cards */
+      .how-card, .policy-card, .spec-cell,
+      .price-block, .order-form, .order-info,
+      .mockup-card, .mockup-strip { width: 100% !important; }
+
+      /* hero text scaling */
+      .hero-title { font-size: clamp(1.9rem, 9vw, 3rem); }
+
+      /* prevent any child from breaking out */
+      * { max-width: 100%; }
+      pre, code, .addr-row code { font-size: 0.72rem; word-break: break-all; }
+
+      /* modal stays usable */
+      .crypto-modal-inner { padding: 1.5rem 1.25rem; }
+      .coin-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+      .coin-btn  { padding: 0.4rem 0.3rem; font-size: 0.7rem; }
+
+      /* guide steps single column */
+      .guide-steps { gap: 1rem; }
+      .g-step { gap: 0.75rem; }
+      .g-num  { font-size: 1.5rem; min-width: 2rem; }
     }
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; animation: none !important; }
@@ -1640,46 +1678,7 @@
 
   <div class="order-layout">
 
-    <!-- Left: pricing info -->
-    <div class="order-info">
-
-      <!-- What this is / isn't - clarity before purchase -->
-      <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
-        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.75rem;">// what you're actually buying</div>
-        <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem;">
-          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">A one-of-a-kind desk display</strong>, built specifically for your NFT token. No other device will ever have this exact artwork.</span></div>
-          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">Real solo mining participation</strong>. The device is genuinely doing SHA-256 work against the Bitcoin network while it sits on your desk.</span></div>
-          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;margin-top:1px;">✗</span><span style="color:var(--muted);"><strong style="color:var(--text);">Solving Blocks Isn't Guaranteed.</strong> 1W of hashrate participates in real solo mining but the odds of solving a block are astronomically small. The chance is always live, but this is not a guaranteed income device.</span></div>
-        </div>
-      </div>
-
-      <div class="price-block">
-        <div class="price-block-title">// Pricing</div>
-        <div class="price-row"><span class="item">NerdMiner V2: custom NFT skin</span><span class="amount">$28.00</span></div>
-        <div class="price-row"><span class="item">Shipping (USPS, baked in)</span><span class="amount">$10.00</span></div>
-        <div class="price-row"><span class="item">+ Acrylic case (optional)</span><span class="amount">$4.00 <span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;margin-left:4px;">$5</span></span></div>
-        <div class="price-row" style="color:var(--green);font-size:0.85rem;"><span class="item">🎉 Order 3+ and shipping is free</span><span class="amount">−$10/ea</span></div>
-        <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;"> Pay with OTR for a <strong style="color:var(--accent);">5% discount</strong></span><span class="amount" style="color:var(--accent);">−5%</span></div>
-        <div class="price-total">
-          <span class="label">Your total</span>
-          <span class="value" id="display-total">$38.00</span>
-        </div>
-        <p class="price-note">Live ETH equivalent shown at checkout. Prices in USD.</p>
-      </div>
-
-      <div style="font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:0.75rem;">What's included</div>
-      <div class="includes-list">
-        <div class="includes-item"><span class="check">✦</span><span>NerdMiner V2, 2.8" color TFT display device, hand-assembled</span></div>
-        <div class="includes-item"><span class="check">✦</span><span><strong>Your specific NFT artwork</strong>, permanently embedded. This device is built once, for your token, and won't be replicated</span></div>
-        <div class="includes-item"><span class="check">✦</span><span>Real SHA-256 solo mining participation on ~1W draw, a live process and not a promise of income</span></div>
-        <div class="includes-item"><span class="check">✦</span><span>Pre-configured for pool.sethforprivacy.com</span></div>
-        <div class="includes-item"><span class="check">✦</span><span>USB-C cable &amp; printed setup instructions</span></div>
-        <div class="includes-item" id="case-include" style="display:none;"><span class="check">✦</span><span>Acrylic protective case</span></div>
-      </div>
-
-    </div>
-
-    <!-- Right: order form -->
+    <!-- Left: order form -->
     <!-- SUCCESS STATE - shown after Formspree submission -->
     <div class="order-form" id="order-success" style="display:none; text-align:center; padding:3rem 2rem;">
       <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
@@ -1811,6 +1810,46 @@
         &nbsp;<a href="#crypto-guide" style="color:var(--accent);cursor:pointer;">Payment guide →</a>
       </p>
     </form>
+
+    <!-- Right: pricing info -->
+    <div class="order-info">
+
+      <!-- What this is / isn't -->
+      <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.75rem;">// what you're actually buying</div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem;">
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">A one-of-a-kind desk display</strong>, built specifically for your NFT token. No other device will ever have this exact artwork.</span></div>
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#4ade80;flex-shrink:0;margin-top:1px;">✓</span><span><strong style="color:var(--text);">Real solo mining participation</strong>. The device is genuinely doing SHA-256 work against the Bitcoin network while it sits on your desk.</span></div>
+          <div style="display:flex;gap:0.6rem;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;margin-top:1px;">✗</span><span style="color:var(--muted);"><strong style="color:var(--text);">Solving Blocks Isn't Guaranteed.</strong> 1W of hashrate participates in real solo mining but the odds of solving a block are astronomically small. The chance is always live, but this is not a guaranteed income device.</span></div>
+        </div>
+      </div>
+
+      <div class="price-block">
+        <div class="price-block-title">// Pricing</div>
+        <div class="price-row"><span class="item">NerdMiner V2: custom NFT skin</span><span class="amount">$28.00</span></div>
+        <div class="price-row"><span class="item">Shipping (USPS)</span><span class="amount">$10.00</span></div>
+        <div class="price-row"><span class="item">+ Acrylic case (optional)</span><span class="amount">$4.00 <span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;margin-left:4px;">$5</span></span></div>
+        <div class="price-row" id="free-ship-promo" style="display:none;color:var(--green);font-size:0.85rem;"><span class="item">🎉 Order 3+ and shipping is free</span><span class="amount">-$10</span></div>
+        <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;"> Pay with OTR for a <strong style="color:var(--accent);">5% discount</strong></span><span class="amount" style="color:var(--accent);">-5%</span></div>
+        <div class="price-total">
+          <span class="label">Your total</span>
+          <span class="value" id="display-total">$38.00</span>
+        </div>
+        <p class="price-note">Live ETH equivalent shown at checkout. Prices in USD.</p>
+      </div>
+
+      <div style="font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:0.75rem;">What's included</div>
+      <div class="includes-list">
+        <div class="includes-item"><span class="check">✦</span><span>NerdMiner V2, 2.8" color TFT display device, hand-assembled</span></div>
+        <div class="includes-item"><span class="check">✦</span><span><strong>Your specific NFT artwork</strong>, permanently embedded. This device is built once, for your token, and won't be replicated</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>Real SHA-256 solo mining participation on ~1W draw, a live process and not a promise of income</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>Pre-configured for pool.sethforprivacy.com</span></div>
+        <div class="includes-item"><span class="check">✦</span><span>USB-C cable &amp; printed setup instructions</span></div>
+        <div class="includes-item" id="case-include" style="display:none;"><span class="check">✦</span><span>Acrylic protective case</span></div>
+      </div>
+
+    </div>
+
   </div>
 </section>
 
@@ -2298,6 +2337,8 @@
     if (el('summary-qty-val')) el('summary-qty-val').textContent = qty + ' × $' + unitPrice.toFixed(2);
     const promoBanner = el('free-ship-banner');
     if (promoBanner) promoBanner.style.display = (freeShip && !isInternational) ? 'flex' : 'none';
+    const promoRow = el('free-ship-promo');
+    if (promoRow) promoRow.style.display = (freeShip && !isInternational) ? 'flex' : 'none';
     const caseInclude = el('case-include');
     if (caseInclude) caseInclude.style.display = withCase ? 'flex' : 'none';
 
