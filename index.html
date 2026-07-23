@@ -1262,9 +1262,14 @@
       /* hero text scaling */
       .hero-title { font-size: clamp(1.9rem, 9vw, 3rem); }
 
-      /* prevent any child from breaking out — but exempt the infinite scroll strip */
-      *:not(.examples-strip):not(.examples-strip *) { max-width: 100%; }
+      /* prevent any child from breaking out */
+      img, video, iframe, table { max-width: 100%; }
       pre, code, .addr-row code { font-size: 0.72rem; word-break: break-all; }
+
+      /* explicitly keep the scroll strip unconstrained */
+      .examples-strip-wrap { overflow: hidden; }
+      .examples-strip { width: max-content !important; max-width: none !important; }
+      .example-card   { width: 220px !important;       max-width: none !important; flex-shrink: 0 !important; }
 
       /* modal stays usable */
       .crypto-modal-inner { padding: 1.5rem 1.25rem; }
@@ -1366,6 +1371,46 @@
     </div>
   </div>
 </div>
+
+<section id="nfts" style="padding:2.5rem 0 3rem;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 2rem 1.5rem;">
+    <p class="section-eyebrow">// NFTs</p>
+    <h2 class="section-title">Every device is <span class="grad">one of a kind</span></h2>
+    <p class="section-body">Real builds from the SAPEs and ZKPeers collections, each one matched to a single token. Drop in your NFT and yours joins the list.</p>
+  </div>
+
+  <!-- unified scrolling strip -->
+  <div class="examples-strip-wrap">
+    <div class="examples-strip" id="examples-strip">
+
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/zkpeer-1037.png" alt="ZKPeer #1037 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1037</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/sape-108.png" alt="SAPE #108 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#108</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/zkpeer-1001.png" alt="ZKPeer #1001 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1001</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/sape-117.png" alt="SAPE #117 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#117</span></div>
+      </div>
+      <div class="example-card">
+        <div class="example-img-wrap"><img src="images/131.png" alt="SAPE #131 NFT artwork"/></div>
+        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#131</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:0.82rem;text-align:center;margin-top:1.5rem;padding:0 2rem;">
+    SAPEs · ZKPeers · Any NFT you bring us
+  </p>
+</section>
 
 <div class="ekg-divider" aria-hidden="true">
   <svg viewBox="0 0 1200 54" preserveAspectRatio="none">
@@ -1522,49 +1567,7 @@
     }
   }
 </style>
-<section id="collections" style="padding:4rem 0;">
-  <div style="max-width:1200px;margin:0 auto;padding:0 2rem 2rem;">
-    <p class="section-eyebrow">// examples</p>
-    <h2 class="section-title">Every device is <span class="grad">one of a kind</span></h2>
-    <p class="section-body">Real builds from the SAPEs and ZKPeers collections, each one matched to a single token. Drop in your NFT and yours joins the list.</p>
-  </div>
 
-  <!-- unified scrolling strip - add as many example-card divs as you like -->
-  <div class="examples-strip-wrap">
-    <div class="examples-strip" id="examples-strip">
-
-      <!-- ── EXAMPLE CARDS ── drop in real images by replacing the placeholder divs ──
-           To add more: copy any .example-card block and paste it before the closing </div>
-           The strip duplicates itself automatically for the seamless loop.            -->
-
-      <div class="example-card">
-        <div class="example-img-wrap"><img src="images/zkpeer-1037.png" alt="ZKPeer #1037 NFT artwork"/></div>
-        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1037</span></div>
-      </div>
-      <div class="example-card">
-        <div class="example-img-wrap"><img src="images/sape-108.png" alt="SAPE #108 NFT artwork"/></div>
-        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#108</span></div>
-      </div>
-      <div class="example-card">
-        <div class="example-img-wrap"><img src="images/zkpeer-1001.png" alt="ZKPeer #1001 NFT artwork"/></div>
-        <div class="example-label"><span class="example-collection">ZKPeers</span><span class="example-token">#1001</span></div>
-      </div>
-      <div class="example-card">
-        <div class="example-img-wrap"><img src="images/sape-117.png" alt="SAPE #117 NFT artwork"/></div>
-        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#117</span></div>
-      </div>
-      <div class="example-card">
-        <div class="example-img-wrap"><img src="images/131.png" alt="SAPE #131 NFT artwork"/></div>
-        <div class="example-label"><span class="example-collection">SAPEs</span><span class="example-token">#131</span></div>
-      </div>
-
-    </div><!-- end examples-strip (JS duplicates it below for the seamless loop) -->
-  </div>
-
-  <p style="color:var(--muted);font-size:0.82rem;text-align:center;margin-top:1.5rem;padding:0 2rem;">
-    SAPEs · ZKPeers · Any NFT you bring us
-  </p>
-</section>
 
 <style>
   /* ── EXAMPLES STRIP ── */
@@ -1779,7 +1782,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" style="margin-bottom:0.5rem;">Add acrylic case? <span style="color:var(--muted);font-weight:400;">($4 · normally $5)</span></label>
+        <label class="form-label" style="margin-bottom:0.5rem;">Add acrylic case? <span style="color:var(--muted);font-weight:400;">Intro promo</span></label>
         <label class="case-toggle-row" id="case-toggle-row">
           <span class="case-toggle-left">
             <input type="checkbox" id="case-checkbox" name="_case_checkbox" />
@@ -1790,7 +1793,7 @@
           </span>
           <span class="case-price-pill">
             <span class="was">$5</span>
-            <span class="now">+$4</span>
+            <span class="now">+$1</span>
           </span>
         </label>
       </div>
@@ -1806,7 +1809,7 @@
         <div class="summary-row" id="summary-qty-row" style="display:none;"><span>Quantity</span><span id="summary-qty-val">1 × $38.00</span></div>
         <div class="summary-row"><span>Device + NFT skin</span><span>$28.00 ea</span></div>
         <div class="summary-row" id="summary-ship-row"><span>Shipping</span><span class="ship-amount">$10.00</span></div>
-        <div class="summary-row" id="summary-case-row" style="display:none;"><span>Acrylic case</span><span>$4.00 ea</span></div>
+        <div class="summary-row" id="summary-case-row" style="display:none;"><span>Acrylic case</span><span>$1.00 ea</span></div>
         <div class="summary-row total"><span>Total</span><span id="summary-total">$38.00</span></div>
       </div>
 
@@ -1840,7 +1843,7 @@
         <div class="price-block-title">// Pricing</div>
         <div class="price-row"><span class="item">NerdMiner V2: custom NFT skin</span><span class="amount">$28.00</span></div>
         <div class="price-row"><span class="item">Shipping (USPS)</span><span class="amount">$10.00</span></div>
-        <div class="price-row"><span class="item">+ Acrylic case (optional)</span><span class="amount">$4.00 <span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;margin-left:4px;">$5</span></span></div>
+        <div class="price-row"><span class="item">+ Acrylic case <span style="font-size:0.75rem;color:#4ade80;font-family:var(--font-mono);">intro promo</span></span><span class="amount" style="display:flex;align-items:center;gap:6px;"><span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;">$5</span>$1.00</span></div>
         <div class="price-row" id="free-ship-promo" style="display:none;color:var(--green);font-size:0.85rem;"><span class="item">🎉 Order 3+ and shipping is free</span><span class="amount">-$10</span></div>
         <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;"> Pay with OTR for a <strong style="color:var(--accent);">5% discount</strong></span><span class="amount" style="color:var(--accent);">-5%</span></div>
         <div class="price-total">
@@ -2302,7 +2305,7 @@
   const BASE_PRICE      = 28.00;
   const SHIP_DOMESTIC   = 10.00;
   const SHIP_INTL       = 23.00;
-  const CASE_PRICE      =  4.00;
+  const CASE_PRICE      =  1.00;
   const FREE_SHIP_QTY   =  3;   // domestic only
 
   /* ── STATE ──────────────────────────────── */
@@ -2355,7 +2358,7 @@
     if (caseInclude) caseInclude.style.display = withCase ? 'flex' : 'none';
 
     if (el('fs-total'))         el('fs-total').value         = fmtTotal;
-    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$4.00 each)' : 'No';
+    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
     if (el('fs-qty'))           el('fs-qty').value           = qty;
     if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)' : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
     if (el('fs-international')) el('fs-international').value = isInternational ? 'Yes' : 'No';
@@ -2555,7 +2558,7 @@
     const freeShip = !isInternational && qty >= FREE_SHIP_QTY;
     const el = id => document.getElementById(id);
     if (el('fs-total'))         el('fs-total').value         = '$' + total.toFixed(2);
-    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$4.00 each)' : 'No';
+    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
     if (el('fs-qty'))           el('fs-qty').value           = qty;
     if (el('fs-international')) el('fs-international').value = isInternational ? 'Yes' : 'No';
     if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational
@@ -2788,7 +2791,7 @@
       const fsQty     = document.getElementById('fs-qty');
       const fsShipCost = document.getElementById('fs-shipping-cost');
       if (fsTotal)    fsTotal.value    = '$' + total.toFixed(2);
-      if (fsCase)     fsCase.value     = withCase ? 'Yes (+$4.00 each)' : 'No';
+      if (fsCase)     fsCase.value     = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
       if (fsSubject)  fsSubject.value  = 'New Customized-Nerdminer Commission x' + qty + ' - $' + total.toFixed(2);
       if (fsQty)      fsQty.value      = qty;
       if (fsShipCost) fsShipCost.value = isInternational ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)' : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
