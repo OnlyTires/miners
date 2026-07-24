@@ -1843,9 +1843,9 @@
         <div class="price-block-title">// Pricing</div>
         <div class="price-row"><span class="item">NerdMiner V2: custom NFT skin</span><span class="amount">$28.00</span></div>
         <div class="price-row"><span class="item">Shipping (USPS)</span><span class="amount">$10.00</span></div>
-        <div class="price-row"><span class="item">+ Acrylic case <span style="font-size:0.75rem;color:#4ade80;font-family:var(--font-mono);">intro promo</span></span><span class="amount" style="display:flex;align-items:center;gap:6px;"><span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;">$5</span>$1.00</span></div>
+        <div class="price-row" id="case-price-row" style="display:none;"><span class="item">+ Acrylic case <span style="font-size:0.75rem;color:#4ade80;font-family:var(--font-mono);">discount shown at checkout</span></span><span class="amount" style="display:flex;align-items:center;gap:6px;"><span style="text-decoration:line-through;color:var(--muted);font-size:0.8rem;">$5</span>$1.00</span></div>
         <div class="price-row" id="free-ship-promo" style="display:none;color:var(--green);font-size:0.85rem;"><span class="item">🎉 Order 3+ and shipping is free</span><span class="amount">-$10</span></div>
-        <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;"> Pay with OTR for a <strong style="color:var(--accent);">5% discount</strong></span><span class="amount" style="color:var(--accent);">-5%</span></div>
+        <div class="price-row" style="font-size:0.85rem;align-items:center;"><span class="item" style="display:flex;align-items:center;gap:6px;"><img src="images/otr.gif" alt="OTR" style="width:18px;height:18px;border-radius:3px;object-fit:cover;">&nbsp;(Pay with OTR — 5% discount shown at checkout)</span><span class="amount" style="color:var(--accent);">&#8722;5%</span></div>
         <div class="price-total">
           <span class="label">Your total</span>
           <span class="value" id="display-total">$38.00</span>
@@ -2347,6 +2347,8 @@
     }
     const caseRow = el('summary-case-row');
     if (caseRow) caseRow.style.display = withCase ? 'flex' : 'none';
+    const casePriceRow = el('case-price-row');
+    if (casePriceRow) casePriceRow.style.display = withCase ? 'flex' : 'none';
     const qtyRow = el('summary-qty-row');
     if (qtyRow) qtyRow.style.display = qty > 1 ? 'flex' : 'none';
     if (el('summary-qty-val')) el('summary-qty-val').textContent = qty + ' × $' + unitPrice.toFixed(2);
