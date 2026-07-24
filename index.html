@@ -1720,17 +1720,18 @@
       <input type="hidden" name="acrylic_case"    id="fs-case"          value="No" />
       <input type="hidden" name="shipping_cost"   id="fs-shipping-cost" value="$10.00" />
       <input type="hidden" name="international"   id="fs-international" value="No" />
+      <input type="hidden" name="nft_link"        id="fs-nft-link"      value="" />
 
 
       <div class="form-group">
-        <label class="form-label" for="fs-token">Token ID / NFT Number <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
-        <input class="form-input" type="text" id="token-id" name="token_id" placeholder="e.g. 0042" />
+        <label class="form-label" for="fs-token">Token ID / NFT Number<span class="req">*</span></label>
+        <input class="form-input" type="text" id="token-id" name="_token_id_raw" placeholder="e.g. 0042" required />
         <div class="form-hint">The number of your specific NFT in the collection.</div>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="fs-contract">NFT Contract Address<span class="req">*</span></label>
-        <input class="form-input" type="text" id="contract-addr" name="contract_address" placeholder="0x…" required />
+        <input class="form-input" type="text" id="contract-addr" name="_contract_addr_raw" placeholder="0x…" required />
         <div class="form-hint">Helps us pull the exact artwork if there are multiple versions.</div>
       </div>
 
@@ -2523,6 +2524,7 @@
   function previewPrices() {
     // Validate required fields before showing prices
     const required = [
+      { id: 'token-id',      label: 'Token ID' },
       { id: 'contract-addr', label: 'NFT Contract Address' },
       { id: 'buyer-name',    label: 'Your Name' },
       { id: 'buyer-email',   label: 'Email' },
@@ -2567,6 +2569,14 @@
       ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)'
       : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
     if (el('fs-subject')) el('fs-subject').value = 'New OnlyMiners Commission x' + qty + ' - $' + total.toFixed(2);
+
+    // Build HairyLabs NFT link from contract + token ID
+    const contractVal = (document.getElementById('contract-addr')?.value || '').trim();
+    const tokenVal    = (document.getElementById('token-id')?.value || '').trim();
+    const nftLinkEl   = document.getElementById('fs-nft-link');
+    if (nftLinkEl && contractVal && tokenVal) {
+      nftLinkEl.value = 'https://hairylabs.io/item/' + contractVal + '/' + tokenVal;
+    }
 
     try {
       const data = new FormData(form);
