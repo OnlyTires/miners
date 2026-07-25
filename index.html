@@ -1695,37 +1695,10 @@
 
     <!-- Left: order form -->
     <!-- SUCCESS STATE - shown after Formspree submission -->
-    <div class="order-form" id="order-success" style="display:none; text-align:center; padding:2.5rem 2rem;">
-      <div style="font-size:2.5rem; margin-bottom:0.75rem;">✅</div>
+    <div class="order-form" id="order-success" style="display:none; text-align:center; padding:3rem 2rem;">
+      <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
       <div class="order-form-title" style="margin-bottom:0.5rem;">Order received!</div>
-      <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:340px; margin:0 auto 1.5rem;">We have your details. Now complete two quick steps below to finalize your commission.</p>
-
-      <!-- STEP 1: NFT Image Upload -->
-      <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;text-align:left;">
-        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.6rem;">Step 1 // Upload your NFT artwork</div>
-        <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0.85rem;line-height:1.6;">Send us a screenshot or exported image of your NFT. This helps us match the exact artwork before we build.</p>
-        <label id="upload-label" style="display:flex;align-items:center;justify-content:center;gap:0.6rem;border:1.5px dashed rgba(124,58,237,0.4);border-radius:var(--radius-sm);padding:1rem;cursor:pointer;transition:border-color 0.2s;font-size:0.85rem;color:var(--muted);">
-          <span id="upload-icon" style="font-size:1.3rem;">🖼️</span>
-          <span id="upload-text">Tap to select image</span>
-          <input type="file" id="nft-image-upload" accept="image/*" style="display:none;" onchange="handleImageSelect(this)" />
-        </label>
-        <div id="upload-preview" style="display:none;margin-top:0.75rem;text-align:center;">
-          <img id="upload-preview-img" style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);border:1px solid var(--border);" />
-          <p id="upload-filename" style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem;"></p>
-        </div>
-        <p style="font-size:0.7rem;color:var(--muted);margin-top:0.6rem;opacity:0.7;">Optional but recommended. PNG, JPG, GIF accepted. We can also find it via collection and token ID if you skip this.</p>
-        <p id="upload-status" style="display:none;font-size:0.78rem;margin-top:0.5rem;font-weight:600;"></p>
-      </div>
-
-      <!-- STEP 2: Crypto Payment -->
-      <div style="background:rgba(192,38,211,0.06);border:1px solid rgba(192,38,211,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;text-align:left;">
-        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;">Step 2 // Complete payment</div>
-        <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0.85rem;line-height:1.6;">Your order ships once we confirm the transaction on-chain.</p>
-        <button class="btn-crypto" id="success-crypto-btn" style="width:100%;">
-          ₿ See Payment Options: <span id="success-amount">$38.00</span>
-        </button>
-        <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem; text-align:center;">ETH · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK</p>
-      </div>
+      <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:320px; margin:0 auto;">We have your details. Check your email for confirmation.</p>
     </div>
 
     <!-- ORDER FORM -->
@@ -2038,6 +2011,46 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════
+     NFT IMAGE UPLOAD MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeUploadModal()">✕</button>
+
+    <p style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.35rem;">// Step 1 of 2</p>
+    <h3 style="margin-bottom:0.25rem;">Upload your NFT artwork</h3>
+    <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;margin-bottom:1.25rem;">Send us a screenshot or image of your NFT so we can match the exact artwork before we build. You can skip this and we'll find it via your collection and token ID.</p>
+
+    <!-- Drop zone -->
+    <label id="upload-label" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;border:1.5px dashed rgba(124,58,237,0.4);border-radius:var(--radius);padding:2rem 1rem;cursor:pointer;transition:border-color 0.2s,background 0.2s;font-size:0.875rem;color:var(--muted);text-align:center;background:rgba(124,58,237,0.04);">
+      <span id="upload-icon" style="font-size:2rem;line-height:1;">🖼️</span>
+      <span id="upload-text" style="font-weight:500;">Tap to select image</span>
+      <span style="font-size:0.72rem;opacity:0.6;">PNG · JPG · GIF · WEBP</span>
+      <input type="file" id="nft-image-upload" accept="image/*" style="display:none;" onchange="handleImageSelect(this)" />
+    </label>
+
+    <!-- Preview -->
+    <div id="upload-preview" style="display:none;margin-top:1rem;text-align:center;">
+      <img id="upload-preview-img" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);border:1px solid var(--border);object-fit:contain;" />
+      <p id="upload-filename" style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem;"></p>
+    </div>
+
+    <!-- Status -->
+    <p id="upload-status" style="display:none;font-size:0.82rem;font-weight:600;margin-top:0.75rem;text-align:center;line-height:1.5;"></p>
+
+    <!-- Actions -->
+    <div style="display:flex;flex-direction:column;gap:0.65rem;margin-top:1.25rem;">
+      <button id="upload-confirm-btn" class="btn-crypto" onclick="confirmUploadAndPay()" style="width:100%;" disabled>
+        Continue to Payment ₿
+      </button>
+      <button onclick="skipUploadAndPay()" style="background:none;border:none;color:var(--muted);font-size:0.82rem;cursor:pointer;padding:0.25rem;text-decoration:underline;text-underline-offset:3px;">
+        Skip — go straight to payment
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════
      CRYPTO MODAL
@@ -2616,17 +2629,13 @@
         headers: { 'Accept': 'application/json' }
       });
       if (res.ok) {
-        if (submitArea) submitArea.style.display = 'none';
-        if (successEl) successEl.style.display = 'block';
-        // Also show the main success state
+        // Hide form, show simple confirmation
         const formEl = document.getElementById('order-form');
         const orderSuccess = document.getElementById('order-success');
         if (formEl) formEl.style.display = 'none';
-        if (orderSuccess) {
-          const sa = document.getElementById('success-amount');
-          if (sa) sa.textContent = '$' + total.toFixed(2);
-          orderSuccess.style.display = 'block';
-        }
+        if (orderSuccess) orderSuccess.style.display = 'block';
+        // Open upload modal immediately
+        openUploadModal(total);
       } else {
         const json = await res.json().catch(() => ({}));
         const msg = (json.errors || []).map(e => e.message).join(', ') || 'Submission failed. Please try again.';
@@ -2760,6 +2769,45 @@
     if (addrEl) addrEl.textContent = CRYPTO_ADDRESSES[coin] || CRYPTO_ADDRESSES.ETH;
   }
 
+  /* ── UPLOAD MODAL ────────────────────────── */
+  let _pendingTotal = 0;
+
+  function openUploadModal(total) {
+    _pendingTotal = total || calcTotal();
+    // Reset state
+    const icon    = document.getElementById('upload-icon');
+    const text    = document.getElementById('upload-text');
+    const label   = document.getElementById('upload-label');
+    const preview = document.getElementById('upload-preview');
+    const status  = document.getElementById('upload-status');
+    const btn     = document.getElementById('upload-confirm-btn');
+    const input   = document.getElementById('nft-image-upload');
+    if (icon)    icon.textContent  = '🖼️';
+    if (text)    text.textContent  = 'Tap to select image';
+    if (label)   label.style.borderColor = 'rgba(124,58,237,0.4)';
+    if (preview) preview.style.display   = 'none';
+    if (status)  { status.style.display  = 'none'; status.textContent = ''; }
+    if (btn)     btn.disabled = true;
+    if (input)   input.value = '';
+    document.getElementById('upload-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeUploadModal() {
+    document.getElementById('upload-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function confirmUploadAndPay() {
+    closeUploadModal();
+    openCryptoModal(_pendingTotal);
+  }
+
+  function skipUploadAndPay() {
+    closeUploadModal();
+    openCryptoModal(_pendingTotal);
+  }
+
   /* ── NFT IMAGE UPLOAD — Cloudinary + Formcarry follow-up ─── */
   const CLOUDINARY_CLOUD  = 'qdl0acno';
   const CLOUDINARY_PRESET = 'nerdminer_pls';
@@ -2772,22 +2820,25 @@
     if (!file) return;
     const preview  = document.getElementById('upload-preview');
     const img      = document.getElementById('upload-preview-img');
+    const filename = document.getElementById('upload-filename');
     const text     = document.getElementById('upload-text');
     const icon     = document.getElementById('upload-icon');
     const label    = document.getElementById('upload-label');
+    const btn      = document.getElementById('upload-confirm-btn');
 
     // Show local preview immediately
     const reader = new FileReader();
     reader.onload = e => {
       img.src = e.target.result;
+      if (filename) filename.textContent = file.name;
       preview.style.display = 'block';
       text.textContent = file.name;
       icon.textContent = '⏳';
       label.style.borderColor = 'rgba(251,191,36,0.5)';
+      if (btn) btn.disabled = true;
     };
     reader.readAsDataURL(file);
 
-    // Upload to Cloudinary
     uploadToCloudinary(file);
   }
 
@@ -2795,14 +2846,14 @@
     const statusEl = document.getElementById('upload-status');
     const icon     = document.getElementById('upload-icon');
     const label    = document.getElementById('upload-label');
+    const btn      = document.getElementById('upload-confirm-btn');
 
-    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Uploading image...'; statusEl.style.color = 'var(--muted)'; }
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Uploading...'; statusEl.style.color = 'var(--muted)'; }
 
     try {
       const fd = new FormData();
       fd.append('file', file);
       fd.append('upload_preset', CLOUDINARY_PRESET);
-      // Tag with NFT reference so it's findable in Cloudinary dashboard
       fd.append('tags', 'nerdminer_order,' + _orderRef.nft.replace(/\s+/g, '_'));
       fd.append('context', 'order_name=' + _orderRef.name + '|order_total=' + _orderRef.total);
 
@@ -2817,15 +2868,17 @@
 
       icon.textContent = '✅';
       label.style.borderColor = 'rgba(74,222,128,0.5)';
-      if (statusEl) { statusEl.textContent = 'Image uploaded.'; statusEl.style.color = '#4ade80'; }
+      if (statusEl) { statusEl.textContent = 'Image uploaded. Ready to continue.'; statusEl.style.color = '#4ade80'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Continue to Payment ₿'; }
 
-      // Fire second Formcarry post with image URL tied to the order
       await sendImageLinkToFormcarry(imageUrl);
 
     } catch(err) {
       icon.textContent = '❌';
       label.style.borderColor = 'rgba(239,68,68,0.4)';
-      if (statusEl) { statusEl.textContent = 'Upload failed. Please email the image to onlytires.pls@gmail.com with your order name. Error: ' + err.message; statusEl.style.color = '#fca5a5'; }
+      if (statusEl) { statusEl.textContent = 'Upload failed — you can skip and email the image to onlytires.pls@gmail.com with your name.'; statusEl.style.color = '#fca5a5'; }
+      // Enable confirm anyway so they're not stuck
+      if (btn) { btn.disabled = false; btn.textContent = 'Continue to Payment ₿'; }
     }
   }
 
