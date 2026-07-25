@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=1200"/>
   <title>OnlyMiners: Custom NFT NerdMiner V2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -1695,19 +1695,42 @@
 
     <!-- Left: order form -->
     <!-- SUCCESS STATE - shown after Formspree submission -->
-    <div class="order-form" id="order-success" style="display:none; text-align:center; padding:3rem 2rem;">
-      <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
+    <div class="order-form" id="order-success" style="display:none; text-align:center; padding:2.5rem 2rem;">
+      <div style="font-size:2.5rem; margin-bottom:0.75rem;">✅</div>
       <div class="order-form-title" style="margin-bottom:0.5rem;">Order received!</div>
-      <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:320px; margin:0 auto 1.5rem;">We've got your commission details. Now complete your crypto payment using the button below. Your order ships once we confirm the transaction on-chain.</p>
-      <button class="btn-crypto" id="success-crypto-btn">
-        ₿ Complete Payment: <span id="success-amount">$38.00</span>
-      </button>
-      <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem;">ETH · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK</p>
+      <p style="color:var(--muted); font-size:0.9rem; line-height:1.7; max-width:340px; margin:0 auto 1.5rem;">We have your details. Now complete two quick steps below to finalize your commission.</p>
+
+      <!-- STEP 1: NFT Image Upload -->
+      <div style="background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;text-align:left;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.6rem;">Step 1 // Upload your NFT artwork</div>
+        <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0.85rem;line-height:1.6;">Send us a screenshot or exported image of your NFT. This helps us match the exact artwork before we build.</p>
+        <label id="upload-label" style="display:flex;align-items:center;justify-content:center;gap:0.6rem;border:1.5px dashed rgba(124,58,237,0.4);border-radius:var(--radius-sm);padding:1rem;cursor:pointer;transition:border-color 0.2s;font-size:0.85rem;color:var(--muted);">
+          <span id="upload-icon" style="font-size:1.3rem;">🖼️</span>
+          <span id="upload-text">Tap to select image</span>
+          <input type="file" id="nft-image-upload" accept="image/*" style="display:none;" onchange="handleImageSelect(this)" />
+        </label>
+        <div id="upload-preview" style="display:none;margin-top:0.75rem;text-align:center;">
+          <img id="upload-preview-img" style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);border:1px solid var(--border);" />
+          <p id="upload-filename" style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem;"></p>
+        </div>
+        <p style="font-size:0.7rem;color:var(--muted);margin-top:0.6rem;opacity:0.7;">Optional but recommended. PNG, JPG, GIF accepted. We can also find it via collection and token ID if you skip this.</p>
+        <p id="upload-status" style="display:none;font-size:0.78rem;margin-top:0.5rem;font-weight:600;"></p>
+      </div>
+
+      <!-- STEP 2: Crypto Payment -->
+      <div style="background:rgba(192,38,211,0.06);border:1px solid rgba(192,38,211,0.25);border-radius:var(--radius);padding:1.25rem 1.5rem;text-align:left;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:0.6rem;">Step 2 // Complete payment</div>
+        <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0.85rem;line-height:1.6;">Your order ships once we confirm the transaction on-chain.</p>
+        <button class="btn-crypto" id="success-crypto-btn" style="width:100%;">
+          ₿ See Payment Options: <span id="success-amount">$38.00</span>
+        </button>
+        <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem; text-align:center;">ETH · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK</p>
+      </div>
     </div>
 
     <!-- ORDER FORM -->
     <form class="order-form" id="order-form"
-          action="https://formspree.io/f/xykrdbgn"
+          action="https://formcarry.com/s/qL0BjulZIJ4"
           method="POST">
 
       <div class="order-form-title">Order Form</div>
@@ -1723,16 +1746,28 @@
       <input type="hidden" name="nft_link"        id="fs-nft-link"      value="" />
 
 
-      <div class="form-group">
-        <label class="form-label" for="fs-token">Token ID / NFT Number<span class="req">*</span></label>
-        <input class="form-input" type="text" id="token-id" name="_token_id_raw" placeholder="e.g. 0042" required />
-        <div class="form-hint">The number of your specific NFT in the collection.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Chain<span class="req">*</span></label>
+          <select class="form-input" id="nft-chain" name="nft_chain" required style="cursor:pointer;">
+            <option value="" disabled selected>Select chain</option>
+            <option value="PulseChain">PulseChain</option>
+            <option value="Ethereum">Ethereum</option>
+            <option value="Base">Base</option>
+            <option value="Solana">Solana</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Token ID<span class="req">*</span></label>
+          <input class="form-input" type="text" id="token-id" name="token_id" placeholder="e.g. 1037" required />
+        </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="fs-contract">NFT Contract Address<span class="req">*</span></label>
-        <input class="form-input" type="text" id="contract-addr" name="_contract_addr_raw" placeholder="0x…" required />
-        <div class="form-hint">Helps us pull the exact artwork if there are multiple versions.</div>
+        <label class="form-label">Collection Name<span class="req">*</span></label>
+        <input class="form-input" type="text" id="collection-name" name="collection_name" placeholder="e.g. ZKPeers, SAPEs" required />
+        <div class="form-hint">We use this to find your artwork and confirm the build before we start.</div>
       </div>
 
       <div class="form-group">
@@ -1801,8 +1836,8 @@
 
       <div class="form-group">
         <label class="form-label" for="fs-notes">Notes <span style="color:var(--muted);font-weight:400;">(optional for single orders)</span></label>
-        <textarea class="form-textarea" id="order-notes" name="notes" placeholder="Ordering multiple different NFTs? List each token ID and contract address here, one per line.&#10;&#10;Example:&#10;Token #0042: 0xContractAddress&#10;Token #0117: 0xContractAddress&#10;&#10;Any other requests about the skin or build go here too." style="min-height:100px;"></textarea>
-        <div class="form-hint" style="margin-top:0.4rem;"><strong style="color:#fbbf24;">Required if ordering multiple different NFTs.</strong> List every token ID and contract address so we can build each device to the right NFT.</div>
+        <textarea class="form-textarea" id="order-notes" name="notes" placeholder="Ordering multiple different NFTs? List each one here, one per line.&#10;&#10;Example:&#10;ZKPeers #1037 on PulseChain&#10;SAPEs #108 on PulseChain&#10;&#10;Any other requests about the skin or build go here too." style="min-height:100px;"></textarea>
+        <div class="form-hint" style="margin-top:0.4rem;"><strong style="color:#fbbf24;">Required if ordering multiple different NFTs.</strong> List each collection, token ID, and chain so we can build each device to the right NFT.</div>
       </div>
 
       <!-- live order summary -->
@@ -2003,20 +2038,6 @@
   </div>
 </div>
 
-<footer>
-  <span class="logo-footer">OnlyMiners</span>
-  <p>Custom NerdMiner V2 devices for the PulseChain community.</p>
-  <p style="margin-top:0.5rem;">
-    <a href="https://github.com/BitMaker-hub/NerdMiner_v2" target="_blank">NerdMiner GitHub</a>
-    &nbsp;·&nbsp;
-    <a href="https://pulsechain.com" target="_blank">PulseChain</a>
-    &nbsp;·&nbsp;
-    <a href="#setup-guide">Setup Guide</a>
-    &nbsp;·&nbsp;
-    <a href="https://t.me/OnlyTires_Pump_Tires" target="_blank" rel="noopener">💬 OTR Telegram</a>
-  </p>
-  <p style="margin-top:1rem;opacity:0.45;">Each device is a one-of-a-kind display piece, not a financial product. Solo mining participation is real but carries no income expectation. Not financial advice.</p>
-</footer>
 
 <!-- ═══════════════════════════════════════════
      CRYPTO MODAL
@@ -2524,11 +2545,12 @@
   function previewPrices() {
     // Validate required fields before showing prices
     const required = [
-      { id: 'token-id',      label: 'Token ID' },
-      { id: 'contract-addr', label: 'NFT Contract Address' },
-      { id: 'buyer-name',    label: 'Your Name' },
-      { id: 'buyer-email',   label: 'Email' },
-      { id: 'shipping-addr', label: 'Shipping Address' },
+      { id: 'nft-chain',       label: 'Chain' },
+      { id: 'token-id',        label: 'Token ID' },
+      { id: 'collection-name', label: 'Collection Name' },
+      { id: 'buyer-name',      label: 'Your Name' },
+      { id: 'buyer-email',     label: 'Email' },
+      { id: 'shipping-addr',   label: 'Shipping Address' },
     ];
     let missing = [];
     required.forEach(f => {
@@ -2570,13 +2592,22 @@
       : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
     if (el('fs-subject')) el('fs-subject').value = 'New OnlyMiners Commission x' + qty + ' - $' + total.toFixed(2);
 
-    // Build HairyLabs NFT link from contract + token ID
-    const contractVal = (document.getElementById('contract-addr')?.value || '').trim();
-    const tokenVal    = (document.getElementById('token-id')?.value || '').trim();
-    const nftLinkEl   = document.getElementById('fs-nft-link');
-    if (nftLinkEl && contractVal && tokenVal) {
-      nftLinkEl.value = 'https://hairylabs.io/item/' + contractVal + '/' + tokenVal;
+    // Build order summary reference from collection + chain + token ID
+    const chainVal      = (document.getElementById('nft-chain')?.value || '').trim();
+    const tokenVal      = (document.getElementById('token-id')?.value || '').trim();
+    const collectionVal = (document.getElementById('collection-name')?.value || '').trim();
+    const nftLinkEl     = document.getElementById('fs-nft-link');
+    if (nftLinkEl) {
+      nftLinkEl.value = collectionVal + ' #' + tokenVal + ' on ' + chainVal;
     }
+
+    // Store order context for the image upload follow-up post
+    _orderRef = {
+      name:  (document.getElementById('buyer-name')?.value  || '').trim(),
+      email: (document.getElementById('buyer-email')?.value || '').trim(),
+      total: '$' + total.toFixed(2),
+      nft:   collectionVal + ' #' + tokenVal + ' on ' + chainVal,
+    };
 
     try {
       const data = new FormData(form);
@@ -2729,7 +2760,91 @@
     if (addrEl) addrEl.textContent = CRYPTO_ADDRESSES[coin] || CRYPTO_ADDRESSES.ETH;
   }
 
-  /* populate guide address on load */
+  /* ── NFT IMAGE UPLOAD — Cloudinary + Formcarry follow-up ─── */
+  const CLOUDINARY_CLOUD  = 'qdl0acno';
+  const CLOUDINARY_PRESET = 'nerdminer_pls';
+
+  // Stores order context set at submission time so the image post can reference it
+  let _orderRef = { name: '', email: '', total: '', nft: '' };
+
+  function handleImageSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const preview  = document.getElementById('upload-preview');
+    const img      = document.getElementById('upload-preview-img');
+    const text     = document.getElementById('upload-text');
+    const icon     = document.getElementById('upload-icon');
+    const label    = document.getElementById('upload-label');
+
+    // Show local preview immediately
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.src = e.target.result;
+      preview.style.display = 'block';
+      text.textContent = file.name;
+      icon.textContent = '⏳';
+      label.style.borderColor = 'rgba(251,191,36,0.5)';
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to Cloudinary
+    uploadToCloudinary(file);
+  }
+
+  async function uploadToCloudinary(file) {
+    const statusEl = document.getElementById('upload-status');
+    const icon     = document.getElementById('upload-icon');
+    const label    = document.getElementById('upload-label');
+
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Uploading image...'; statusEl.style.color = 'var(--muted)'; }
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      // Tag with NFT reference so it's findable in Cloudinary dashboard
+      fd.append('tags', 'nerdminer_order,' + _orderRef.nft.replace(/\s+/g, '_'));
+      fd.append('context', 'order_name=' + _orderRef.name + '|order_total=' + _orderRef.total);
+
+      const res  = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+        method: 'POST', body: fd
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.error) throw new Error(data.error?.message || 'Upload failed');
+
+      const imageUrl = data.secure_url;
+
+      icon.textContent = '✅';
+      label.style.borderColor = 'rgba(74,222,128,0.5)';
+      if (statusEl) { statusEl.textContent = 'Image uploaded.'; statusEl.style.color = '#4ade80'; }
+
+      // Fire second Formcarry post with image URL tied to the order
+      await sendImageLinkToFormcarry(imageUrl);
+
+    } catch(err) {
+      icon.textContent = '❌';
+      label.style.borderColor = 'rgba(239,68,68,0.4)';
+      if (statusEl) { statusEl.textContent = 'Upload failed. Please email the image to onlytires.pls@gmail.com with your order name. Error: ' + err.message; statusEl.style.color = '#fca5a5'; }
+    }
+  }
+
+  async function sendImageLinkToFormcarry(imageUrl) {
+    const fd = new FormData();
+    fd.append('_subject',    'NFT Image — ' + _orderRef.nft + ' (' + _orderRef.name + ')');
+    fd.append('order_name',  _orderRef.name);
+    fd.append('order_email', _orderRef.email);
+    fd.append('order_total', _orderRef.total);
+    fd.append('nft_ref',     _orderRef.nft);
+    fd.append('nft_image',   imageUrl);
+    fd.append('note',        'Image uploaded by customer after order submission.');
+
+    await fetch('https://formcarry.com/s/qL0BjulZIJ4', {
+      method: 'POST', body: fd,
+      headers: { 'Accept': 'application/json' }
+    });
+    // Silent — no need to surface success/failure to user for this secondary post
+  }
   const gAddr = document.getElementById('guide-addr');
   if (gAddr) gAddr.textContent = CRYPTO_ADDRESSES.ETH;
 
@@ -2852,5 +2967,20 @@
     });
   });
 </script>
+<footer>
+  <span class="logo-footer">OnlyMiners</span>
+  <p>Custom NerdMiner V2 devices for the PulseChain community.</p>
+  <p style="margin-top:0.5rem;">
+    <a href="https://github.com/BitMaker-hub/NerdMiner_v2" target="_blank">NerdMiner GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="https://pulsechain.com" target="_blank">PulseChain</a>
+    &nbsp;·&nbsp;
+    <a href="#setup-guide">Setup Guide</a>
+    &nbsp;·&nbsp;
+    <a href="https://t.me/OnlyTires_Pump_Tires" target="_blank" rel="noopener">💬 OTR Telegram</a>
+  </p>
+  <p style="margin-top:1rem;opacity:0.45;">Each device is a one-of-a-kind display piece, not a financial product. Solo mining participation is real but carries no income expectation. Not financial advice.</p>
+</footer>
+
 </body>
 </html>
