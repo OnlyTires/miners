@@ -1825,12 +1825,11 @@
       <!-- inline error message -->
       <div id="form-error" style="display:none; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-size:0.82rem; color:#fca5a5; margin-bottom:0.85rem;"></div>
 
-      <!-- STEP 1: see price list -->
-      <button type="button" class="btn-crypto" id="see-prices-btn" onclick="previewPrices()">
-        See Payment Options: <span id="crypto-amount-btn">$38.00</span>
+      <button type="submit" class="btn-crypto" id="submit-btn">
+        ₿ Submit Order and See Payment Options: <span id="crypto-amount-btn">$38.00</span>
       </button>
       <p style="font-size:0.72rem; color:var(--muted); margin-top:0.6rem; text-align:center;">
-        ETH · eHEX · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK · USDG
+        ETH · eHEX · USDT · USDC · DAI · PLS · PLSX · pHEX · INC · OTR · FINK · USDG · 𝕏 Money
         &nbsp;<a href="#crypto-guide" style="color:var(--accent);cursor:pointer;">Payment guide →</a>
       </p>
     </form>
@@ -2076,29 +2075,44 @@
       <div class="coin-tab" data-coin="OTR" onclick="setCoin('OTR')">OTR</div>
       <div class="coin-tab" data-coin="FINK" onclick="setCoin('FINK')">FINK</div>
     </div>
+    <div class="coin-tabs" style="margin-top:-0.6rem;border-top:1px solid var(--border);padding-top:0.5rem;">
+      <div class="coin-tab" data-coin="XMONEY" onclick="setCoin('XMONEY')" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.15);">𝕏 Money</div>
+    </div>
     <div class="amount-box">
       <div class="amount-main" id="modal-amount">...</div>
       <div class="amount-usd" id="modal-usd">≈ $38.00 USD</div>
     </div>
-    <div class="addr-block">
-      <span class="addr-label-sm" id="modal-addr-label">Send to this Ethereum address</span>
+    <div class="addr-block" id="addr-block-crypto">
+      <span class="addr-label-sm" id="modal-addr-label">Send to this address</span>
       <div class="addr-row">
         <code id="modal-addr">0xb645920756B145A876B677B8650EB935038b2326</code>
         <button class="copy-btn" onclick="copyText('modal-addr',this)">Copy</button>
       </div>
       <div id="modal-network-note" style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;line-height:1.55;"></div>
-    </div><!-- /addr-block -->
+    </div><!-- /addr-block-crypto -->
+    <div class="addr-block" id="addr-block-xmoney" style="display:none;">
+      <span class="addr-label-sm">Send via X Money to</span>
+      <div class="addr-row" style="align-items:center;gap:0.6rem;">
+        <span id="modal-xmoney-handle" style="font-size:1.15rem;font-weight:700;font-family:var(--font-display);color:var(--text);">@OnlyMiners</span>
+        <button class="copy-btn" onclick="copyXHandle()">Copy</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;line-height:1.55;">Open the X app → your wallet → Send Money → search <strong style="color:var(--text);">@OnlyMiners</strong> → enter the amount shown above.</p>
+      <p style="font-size:0.75rem;color:#fbbf24;margin-top:0.4rem;">⚠️ X Money is currently US only and peer-to-peer. Available to select users.</p>
+    </div><!-- /addr-block-xmoney -->
     <div id="modal-otr-discount" style="display:none;background:rgba(192,38,211,0.1);border:1px solid rgba(192,38,211,0.3);border-radius:var(--radius-sm);padding:0.55rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;color:var(--accent);font-weight:600;">🎉 5% OTR discount applied. Thank you for supporting the community!</div>
-    <div class="modal-note">
+    <div class="modal-note" id="modal-note-crypto">
       After sending, email your <strong>TXID</strong> to <strong>onlytires.pls@gmail.com</strong> with your NFT details and shipping address. Screenshot optional, TXID required. <strong style="color:#ef4444;">Double-check the address before sending. Funds sent to the wrong address cannot be recovered.</strong>
+    </div>
+    <div class="modal-note" id="modal-note-xmoney" style="display:none;">
+      After sending via X Money, email a <strong>screenshot of the transaction confirmation</strong> to <strong>onlytires.pls@gmail.com</strong> with your NFT details and shipping address. We'll confirm receipt before building.
     </div>
 
     <!-- STEP 2 - submit order -->
     <div id="modal-submit-area" style="margin-top:1rem;">
-      <button type="button" id="modal-submit-btn" class="btn-primary" style="width:100%;justify-content:center;font-size:0.9rem;" onclick="submitOrderFromModal()">
-        ✓ Submit My Order
+      <button type="button" id="modal-submit-btn" class="btn-primary" style="width:100%;justify-content:center;font-size:0.9rem;" onclick="submitOrderToFormcarry()">
+        ✓ Payment Complete — Submit Order
       </button>
-      <p style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;text-align:center;line-height:1.5;">Only click once you have your TXID ready to email to <strong>onlytires.pls@gmail.com</strong></p>
+      <p style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;text-align:center;line-height:1.5;">Click after sending payment. We'll confirm on-chain before building.</p>
     </div>
     <div id="modal-submit-success" style="display:none;margin-top:1rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius-sm);padding:0.75rem 1rem;font-size:0.82rem;color:#4ade80;text-align:center;">
       ✅ Order submitted! Email your TXID to <strong>onlytires.pls@gmail.com</strong> to confirm.
@@ -2336,6 +2350,7 @@
     INC:  '0xb645920756B145A876B677B8650EB935038b2326',
     OTR:  '0xb645920756B145A876B677B8650EB935038b2326',
     FINK: '0xb645920756B145A876B677B8650EB935038b2326',
+    XMONEY: '@OnlyMiners',  // X handle — peer-to-peer via X Money app
   };
   const BASE_PRICE      = 28.00;
   const SHIP_DOMESTIC   = 10.00;
@@ -2551,102 +2566,6 @@
   setInterval(fetchNetworkStats, 120000);
 
 
-  /* ── FORM FLOW ───────────────────────────────
-     Step 1: "See Payment Options" → opens crypto modal with price list
-     Step 2: Inside modal → "Submit My Order" → posts form to Formspree
-  ─────────────────────────────────────────── */
-  function previewPrices() {
-    // Validate required fields before showing prices
-    const required = [
-      { id: 'nft-chain',       label: 'Chain' },
-      { id: 'token-id',        label: 'Token ID' },
-      { id: 'collection-name', label: 'Collection Name' },
-      { id: 'buyer-name',      label: 'Your Name' },
-      { id: 'buyer-email',     label: 'Email' },
-      { id: 'shipping-addr',   label: 'Shipping Address' },
-    ];
-    let missing = [];
-    required.forEach(f => {
-      const el = document.getElementById(f.id);
-      if (!el || !el.value.trim()) missing.push(f.label);
-    });
-    if (missing.length) {
-      const errEl = document.getElementById('form-error');
-      if (errEl) {
-        errEl.textContent = 'Please fill in: ' + missing.join(', ');
-        errEl.style.display = 'block';
-      }
-      return;
-    }
-    const errEl = document.getElementById('form-error');
-    if (errEl) errEl.style.display = 'none';
-    openCryptoModal();
-  }
-
-  async function submitOrderFromModal() {
-    const btn = document.getElementById('modal-submit-btn');
-    const successEl = document.getElementById('modal-submit-success');
-    const submitArea = document.getElementById('modal-submit-area');
-    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
-
-    const form = document.getElementById('order-form');
-    if (!form) return;
-
-    // Sync hidden fields before submit
-    const total = calcTotal();
-    const freeShip = !isInternational && qty >= FREE_SHIP_QTY;
-    const el = id => document.getElementById(id);
-    if (el('fs-total'))         el('fs-total').value         = '$' + total.toFixed(2);
-    if (el('fs-case'))          el('fs-case').value          = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
-    if (el('fs-qty'))           el('fs-qty').value           = qty;
-    if (el('fs-international')) el('fs-international').value = isInternational ? 'Yes' : 'No';
-    if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational
-      ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)'
-      : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
-    if (el('fs-subject')) el('fs-subject').value = 'New OnlyMiners Commission x' + qty + ' - $' + total.toFixed(2);
-
-    // Build order summary reference from collection + chain + token ID
-    const chainVal      = (document.getElementById('nft-chain')?.value || '').trim();
-    const tokenVal      = (document.getElementById('token-id')?.value || '').trim();
-    const collectionVal = (document.getElementById('collection-name')?.value || '').trim();
-    const nftLinkEl     = document.getElementById('fs-nft-link');
-    if (nftLinkEl) {
-      nftLinkEl.value = collectionVal + ' #' + tokenVal + ' on ' + chainVal;
-    }
-
-    // Store order context for the image upload follow-up post
-    _orderRef = {
-      name:  (document.getElementById('buyer-name')?.value  || '').trim(),
-      email: (document.getElementById('buyer-email')?.value || '').trim(),
-      total: '$' + total.toFixed(2),
-      nft:   collectionVal + ' #' + tokenVal + ' on ' + chainVal,
-    };
-
-    try {
-      const data = new FormData(form);
-      const res = await fetch(form.action, {
-        method: 'POST', body: data,
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        // Hide form, show simple confirmation
-        const formEl = document.getElementById('order-form');
-        const orderSuccess = document.getElementById('order-success');
-        if (formEl) formEl.style.display = 'none';
-        if (orderSuccess) orderSuccess.style.display = 'block';
-        // Open upload modal immediately
-        openUploadModal(total);
-      } else {
-        const json = await res.json().catch(() => ({}));
-        const msg = (json.errors || []).map(e => e.message).join(', ') || 'Submission failed. Please try again.';
-        if (btn) { btn.disabled = false; btn.textContent = '✓ Submit My Order'; }
-        alert(msg);
-      }
-    } catch(e) {
-      if (btn) { btn.disabled = false; btn.textContent = '✓ Submit My Order'; }
-      alert('Network error. Please check your connection and try again.');
-    }
-  }
   /* ── CRYPTO MODAL ────────────────────────── */
   function openCryptoModal() {
     activeCoin = 'ETH';
@@ -2709,6 +2628,7 @@
 
     // Stablecoins - 1:1 USD, no price fetch needed
     const stables = new Set(['USDT', 'USDC', 'DAI', 'USDG']);
+    const isXMoney = coin === 'XMONEY';
 
     // Coin routing table - maps each coin to its display config
     const coinConfig = {
@@ -2738,6 +2658,22 @@
       } else {
         subEl.textContent = '$' + usd.toFixed(2) + ' USD, select a coin below';
       }
+    }
+
+    // X Money — show handle, hide addr block, swap note
+    const cryptoAddrBlock  = document.getElementById('addr-block-crypto');
+    const xmoneyAddrBlock  = document.getElementById('addr-block-xmoney');
+    const noteCrypto       = document.getElementById('modal-note-crypto');
+    const noteXmoney       = document.getElementById('modal-note-xmoney');
+    if (cryptoAddrBlock) cryptoAddrBlock.style.display = isXMoney ? 'none'  : 'block';
+    if (xmoneyAddrBlock) xmoneyAddrBlock.style.display = isXMoney ? 'block' : 'none';
+    if (noteCrypto)      noteCrypto.style.display      = isXMoney ? 'none'  : 'block';
+    if (noteXmoney)      noteXmoney.style.display      = isXMoney ? 'block' : 'none';
+
+    if (isXMoney) {
+      amountEl.textContent  = '$' + effectiveUsd.toFixed(2) + ' USD';
+      if (usdEl) usdEl.textContent = 'Send exact USD amount via X Money';
+      return;
     }
 
     // Stablecoins: amount is just the dollar value directly
@@ -2806,6 +2742,13 @@
   function skipUploadAndPay() {
     closeUploadModal();
     openCryptoModal(_pendingTotal);
+  }
+
+  function copyXHandle() {
+    navigator.clipboard.writeText('@OnlyMiners').then(() => {
+      const btn = document.querySelector('#addr-block-xmoney .copy-btn');
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1800); }
+    });
   }
 
   /* ── NFT IMAGE UPLOAD — Cloudinary + Formcarry follow-up ─── */
@@ -2931,94 +2874,95 @@
   /* initial render */
   updatePricing();
 </script>
-<!-- Formspree Ajax library -->
-<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
-
 <script>
-  /* ── FORMSPREE FORM HANDLER ──────────────────────────────
-     Intercepts the native form submit, posts to Formspree
-     via Ajax, then shows the success state + crypto modal.
+  /* ── ORDER FLOW ───────────────────────────────────────────
+     1. Submit button → validate → open Upload modal
+     2. Upload modal confirm/skip → open Crypto modal
+     3. Crypto modal "Payment Complete" → POST to Formcarry → done
   ────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('order-form');
-    const successEl = document.getElementById('order-success');
-    const errorEl = document.getElementById('form-error');
+    const form      = document.getElementById('order-form');
+    const errorEl   = document.getElementById('form-error');
     const submitBtn = document.getElementById('submit-btn');
-    const successCryptoBtn = document.getElementById('success-crypto-btn');
-    const successAmountEl = document.getElementById('success-amount');
+    if (!form || !submitBtn) return;
 
-    if (!form) return;
-
-    // Keep success-state crypto button in sync with pricing
-    function syncSuccessAmount() {
-      if (successAmountEl) successAmountEl.textContent = '$' + calcTotal().toFixed(2);
-    }
-
-    // Success-state crypto button opens modal
-    if (successCryptoBtn) {
-      successCryptoBtn.addEventListener('click', openCryptoModal);
-    }
-
-    form.addEventListener('submit', async function(e) {
+    // Intercept the submit button — validate then open upload modal
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
-
-      // Update hidden fields with current pricing before submit
-      const total = calcTotal();
-      const freeShip = qty >= FREE_SHIP_QTY;
-      const fsTotal   = document.getElementById('fs-total');
-      const fsCase    = document.getElementById('fs-case');
-      const fsSubject = document.getElementById('fs-subject');
-      const fsQty     = document.getElementById('fs-qty');
-      const fsShipCost = document.getElementById('fs-shipping-cost');
-      if (fsTotal)    fsTotal.value    = '$' + total.toFixed(2);
-      if (fsCase)     fsCase.value     = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
-      if (fsSubject)  fsSubject.value  = 'New Customized-Nerdminer Commission x' + qty + ' - $' + total.toFixed(2);
-      if (fsQty)      fsQty.value      = qty;
-      if (fsShipCost) fsShipCost.value = isInternational ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)' : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
-
-      // Disable button and show loading state
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Sending…';
       if (errorEl) errorEl.style.display = 'none';
 
-      try {
-        const data = new FormData(form);
-        const res = await fetch(form.action, {
-          method: 'POST',
-          body: data,
-          headers: { 'Accept': 'application/json' }
-        });
+      // Populate hidden pricing fields
+      const total    = calcTotal();
+      const freeShip = !isInternational && qty >= FREE_SHIP_QTY;
+      const el = id => document.getElementById(id);
+      if (el('fs-total'))    el('fs-total').value    = '$' + total.toFixed(2);
+      if (el('fs-case'))     el('fs-case').value     = withCase ? 'Yes (+$1.00 each, intro promo)' : 'No';
+      if (el('fs-subject'))  el('fs-subject').value  = 'New Customized-Nerdminer Commission x' + qty + ' - $' + total.toFixed(2);
+      if (el('fs-qty'))      el('fs-qty').value      = qty;
+      if (el('fs-shipping-cost')) el('fs-shipping-cost').value = isInternational
+        ? '$' + SHIP_INTL.toFixed(2) + ' (international flat)'
+        : (freeShip ? 'Free (3+ promo)' : '$' + SHIP_DOMESTIC.toFixed(2));
 
-        if (res.ok) {
-          // Show success state, hide form
-          form.style.display = 'none';
-          if (successEl) {
-            syncSuccessAmount();
-            successEl.style.display = 'block';
-          }
-          // Auto-open crypto modal so they can pay immediately
-          openCryptoModal();
-        } else {
-          const json = await res.json().catch(() => ({}));
-          const msg = (json.errors || []).map(e => e.message).join(', ')
-            || 'Something went wrong. Please try again or email us directly.';
-          if (errorEl) {
-            errorEl.textContent = msg;
-            errorEl.style.display = 'block';
-          }
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '₿ Submit Order and Pay with Crypto: <span id="crypto-amount-btn">$' + calcTotal().toFixed(2) + '</span>';
-        }
-      } catch(err) {
-        if (errorEl) {
-          errorEl.textContent = 'Network error. Check your connection and try again.';
-          errorEl.style.display = 'block';
-        }
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '₿ Submit Order and Pay with Crypto: <span id="crypto-amount-btn">$' + calcTotal().toFixed(2) + '</span>';
-      }
+      // Build NFT reference for Cloudinary tags + order email
+      const chainVal      = (document.getElementById('nft-chain')?.value || '').trim();
+      const tokenVal      = (document.getElementById('token-id')?.value || '').trim();
+      const collectionVal = (document.getElementById('collection-name')?.value || '').trim();
+      if (el('fs-nft-link')) el('fs-nft-link').value = collectionVal + ' #' + tokenVal + ' on ' + chainVal;
+
+      // Store order context for Cloudinary tagging + Formcarry image email
+      _orderRef = {
+        name:  (document.getElementById('buyer-name')?.value  || '').trim(),
+        email: (document.getElementById('buyer-email')?.value || '').trim(),
+        total: '$' + total.toFixed(2),
+        nft:   collectionVal + ' #' + tokenVal + ' on ' + chainVal,
+      };
+
+      // Open upload modal — crypto modal follows from there
+      openUploadModal(total);
     });
   });
+
+  /* ── POST TO FORMCARRY ─────────────────────────────────────
+     Called from the crypto modal "Payment Complete" button.
+     This is intentionally deferred until after payment is
+     initiated so we only log confirmed-intent orders.
+  ────────────────────────────────────────────────────────── */
+  async function submitOrderToFormcarry() {
+    const form    = document.getElementById('order-form');
+    const errorEl = document.getElementById('form-error');
+    if (!form) return;
+
+    const submitBtn = document.getElementById('modal-submit-btn');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+
+    try {
+      const data = new FormData(form);
+      const res  = await fetch('https://formcarry.com/s/qL0BjulZIJ4', {
+        method: 'POST', body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const successArea = document.getElementById('modal-submit-success');
+      const submitArea  = document.getElementById('modal-submit-area');
+
+      if (res.ok) {
+        if (submitArea)  submitArea.style.display  = 'none';
+        if (successArea) successArea.style.display = 'block';
+        // Hide the form on the main page
+        const formEl = document.getElementById('order-form');
+        const orderSuccess = document.getElementById('order-success');
+        if (formEl) formEl.style.display = 'none';
+        if (orderSuccess) orderSuccess.style.display = 'block';
+      } else {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '✓ Payment Complete — Submit Order'; }
+        if (errorEl) { errorEl.textContent = 'Submission failed. Please try again or email us directly.'; errorEl.style.display = 'block'; }
+      }
+    } catch(err) {
+      const submitBtn = document.getElementById('modal-submit-btn');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '✓ Payment Complete — Submit Order'; }
+      if (errorEl) { errorEl.textContent = 'Network error. Check your connection and try again.'; errorEl.style.display = 'block'; }
+    }
+  }
 </script>
 <footer>
   <span class="logo-footer">OnlyMiners</span>
