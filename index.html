@@ -2093,10 +2093,10 @@
     <div class="addr-block" id="addr-block-xmoney" style="display:none;">
       <span class="addr-label-sm">Send via X Money to</span>
       <div class="addr-row" style="align-items:center;gap:0.6rem;">
-        <span id="modal-xmoney-handle" style="font-size:1.15rem;font-weight:700;font-family:var(--font-display);color:var(--text);">@OnlyMiners</span>
+        <span id="modal-xmoney-handle" style="font-size:1.15rem;font-weight:700;font-family:var(--font-display);color:var(--text);">@OnlyTradesPLS</span>
         <button class="copy-btn" onclick="copyXHandle()">Copy</button>
       </div>
-      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;line-height:1.55;">Open the X app → your wallet → Send Money → search <strong style="color:var(--text);">@OnlyMiners</strong> → enter the amount shown above.</p>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;line-height:1.55;">Open the X app → your wallet → Send Money → search <strong style="color:var(--text);">@OnlyTradesPLS</strong> → enter the amount shown above.</p>
       <p style="font-size:0.75rem;color:#fbbf24;margin-top:0.4rem;">⚠️ X Money is currently US only and peer-to-peer. Available to select users.</p>
     </div><!-- /addr-block-xmoney -->
     <div id="modal-otr-discount" style="display:none;background:rgba(192,38,211,0.1);border:1px solid rgba(192,38,211,0.3);border-radius:var(--radius-sm);padding:0.55rem 0.85rem;margin-top:0.5rem;font-size:0.8rem;color:var(--accent);font-weight:600;">🎉 5% OTR discount applied. Thank you for supporting the community!</div>
@@ -2350,7 +2350,7 @@
     INC:  '0xb645920756B145A876B677B8650EB935038b2326',
     OTR:  '0xb645920756B145A876B677B8650EB935038b2326',
     FINK: '0xb645920756B145A876B677B8650EB935038b2326',
-    XMONEY: '@OnlyMiners',  // X handle — peer-to-peer via X Money app
+    XMONEY: '@OnlyTradesPLS',  // X handle — peer-to-peer via X Money app
   };
   const BASE_PRICE      = 28.00;
   const SHIP_DOMESTIC   = 10.00;
@@ -2745,7 +2745,7 @@
   }
 
   function copyXHandle() {
-    navigator.clipboard.writeText('@OnlyMiners').then(() => {
+    navigator.clipboard.writeText('@OnlyTradesPLS').then(() => {
       const btn = document.querySelector('#addr-block-xmoney .copy-btn');
       if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1800); }
     });
